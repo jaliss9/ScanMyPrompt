@@ -47,6 +47,7 @@ interface PromptInputProps {
   onAnalyze: () => void;
   onClear: () => void;
   isAnalyzing: boolean;
+  isBusy?: boolean;
 }
 
 export function PromptInput({
@@ -55,6 +56,7 @@ export function PromptInput({
   onAnalyze,
   onClear,
   isAnalyzing,
+  isBusy = false,
 }: PromptInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -66,7 +68,9 @@ export function PromptInput({
   const hasText = value.trim().length > 0;
   const isActive = hasText || isFocused;
 
-  const borderGradient = isAnalyzing
+  const isVisualLoading = isAnalyzing || isBusy;
+
+  const borderGradient = isVisualLoading
     ? 'linear-gradient(90deg, #fb7185, #f97316, #facc15, #fb7185)'
     : isActive
       ? 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7, #ec4899, #22d3ee)'
@@ -149,10 +153,10 @@ export function PromptInput({
       <div
         className={`
           absolute -inset-1 blur-2xl rounded-[32px] pointer-events-none transition-all duration-400 motion-reduce:transition-none
-          ${isAnalyzing ? 'opacity-65' : isActive ? 'opacity-55' : 'opacity-35'}
+          ${isVisualLoading ? 'opacity-65' : isActive ? 'opacity-55' : 'opacity-35'}
         `}
         style={{
-          background: isAnalyzing
+          background: isVisualLoading
             ? 'linear-gradient(90deg, rgba(244,63,94,0.35), rgba(249,115,22,0.35), rgba(250,204,21,0.28), rgba(244,63,94,0.35))'
             : isActive
               ? 'linear-gradient(90deg, rgba(34,211,238,0.26), rgba(59,130,246,0.28), rgba(168,85,247,0.26), rgba(236,72,153,0.26))'
@@ -168,8 +172,8 @@ export function PromptInput({
           style={{
             background: borderGradient,
             backgroundSize: '200% 100%',
-            animation: `border-flow ${isAnalyzing ? '2.4s' : isActive ? '4s' : '6s'} linear infinite`,
-            opacity: isAnalyzing ? 1 : isActive ? 0.95 : 0.8
+            animation: `border-flow ${isVisualLoading ? '2.4s' : isActive ? '4s' : '6s'} linear infinite`,
+            opacity: isVisualLoading ? 1 : isActive ? 0.95 : 0.8
           }}
         />
 

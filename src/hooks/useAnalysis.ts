@@ -33,12 +33,14 @@ export function useAnalysis() {
   const [aiInsights, setAiInsights] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const finalizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const mountedRef = useRef(true);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
   }, []);
@@ -51,30 +53,34 @@ export function useAnalysis() {
     setAiInsights(null);
     setIsAiLoading(false);
     if (abortRef.current) abortRef.current.abort();
+    if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
     const controller = new AbortController();
     abortRef.current = controller;
 
     setIsAnalyzing(true);
 
     const analysisResult = analyzePrompt(input);
-    if (!mountedRef.current) return;
-    setResult(analysisResult);
-    setIsAnalyzing(false);
+    // Keep a tiny visual delay so the analyzing border animation is visible.
+    finalizeTimerRef.current = setTimeout(() => {
+      if (!mountedRef.current) return;
+      setResult(analysisResult);
+      setIsAnalyzing(false);
 
-    // Fire AI fetch (non-blocking, after heuristic results shown)
-    setIsAiLoading(true);
-    const lang = language ?? 'en';
-    fetchAiInsights(
-      input,
-      lang,
-      analysisResult.security.riskScore,
-      analysisResult.quality.qualityScore,
-      controller.signal
-    ).then((insights) => {
-      if (!mountedRef.current || controller.signal.aborted) return;
-      setAiInsights(insights);
-      setIsAiLoading(false);
-    });
+      // Fire AI fetch (non-blocking, after heuristic results shown)
+      setIsAiLoading(true);
+      const lang = language ?? 'en';
+      fetchAiInsights(
+        input,
+        lang,
+        analysisResult.security.riskScore,
+        analysisResult.quality.qualityScore,
+        controller.signal
+      ).then((insights) => {
+        if (!mountedRef.current || controller.signal.aborted) return;
+        setAiInsights(insights);
+        setIsAiLoading(false);
+      });
+    }, 180);
   }, [prompt]);
 
   const clear = useCallback(() => {
@@ -82,6 +88,7 @@ export function useAnalysis() {
     setResult(null);
     setAiInsights(null);
     setIsAiLoading(false);
+    if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
     if (abortRef.current) abortRef.current.abort();
   }, []);
 

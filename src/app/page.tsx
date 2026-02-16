@@ -154,6 +154,7 @@ export default function Home() {
               onAnalyze={() => handleAnalyze()}
               onClear={clear}
               isAnalyzing={isAnalyzing}
+              isBusy={isAiLoading}
             />
 
             {/* Results — directly under prompt */}
