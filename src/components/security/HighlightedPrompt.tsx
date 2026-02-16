@@ -5,6 +5,7 @@ import { TRANSLATIONS } from '@/config/i18n';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { useToast } from '@/components/Toast';
 import type { HighlightRange, SecurityCategory } from '@/types';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 interface HighlightedPromptProps {
   prompt: string;
@@ -35,9 +36,11 @@ export function HighlightedPrompt({ prompt, ranges }: HighlightedPromptProps) {
 
   if (ranges.length === 0) return null;
 
-  const handleCopyPrompt = () => {
-    navigator.clipboard.writeText(prompt);
-    showToast(t(TRANSLATIONS.security.copied));
+  const handleCopyPrompt = async () => {
+    const copied = await copyTextToClipboard(prompt);
+    if (copied) {
+      showToast(t(TRANSLATIONS.security.copied));
+    }
   };
 
   // Build segments

@@ -15,20 +15,18 @@ export function QualityRadar({ dimensions }: QualityRadarProps) {
   const maxRadius = 100;
   const numDimensions = dimensions.length;
 
-  // Calculate points for the radar
-  // Dimensions are 0-5, we normalize to 0-1 for radius calc
+  // Scores in dimensions are already normalized between 0 and 1.
   const getPoint = (index: number, value: number) => {
     const angle = (Math.PI * 2 * index) / numDimensions - Math.PI / 2;
-    const normalizedValue = value / 5; // Normalize 0-5 score to 0-1 radius
-    const radius = normalizedValue * maxRadius;
+    const radius = value * maxRadius;
     return {
       x: center + radius * Math.cos(angle),
       y: center + radius * Math.sin(angle),
     };
   };
 
-  // Background grid rings (representing 1, 2, 3, 4, 5 scores)
-  const rings = [1, 2, 3, 4, 5];
+  // Background grid rings (20%, 40%, 60%, 80%, 100%).
+  const rings = [0.2, 0.4, 0.6, 0.8, 1];
 
   // Data points
   const points = dimensions.map((d, i) => getPoint(i, d.score));
@@ -67,9 +65,7 @@ export function QualityRadar({ dimensions }: QualityRadarProps) {
 
         {/* Grid rings */}
         {rings.map((ringValue) => {
-          // Normalize ring value (1-5) to radius ratio (0.2 - 1.0)
-          const radiusRatio = ringValue; // getPoint expects 0-5 value
-          const ringPoints = dimensions.map((_, i) => getPoint(i, radiusRatio));
+          const ringPoints = dimensions.map((_, i) => getPoint(i, ringValue));
           const ringPath = ringPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z';
           return (
             <path
@@ -85,7 +81,7 @@ export function QualityRadar({ dimensions }: QualityRadarProps) {
 
         {/* Axis lines */}
         {dimensions.map((_, i) => {
-          const point = getPoint(i, 5); // Max value point
+          const point = getPoint(i, 1); // Max value point
           return (
             <line
               key={i}
@@ -123,7 +119,7 @@ export function QualityRadar({ dimensions }: QualityRadarProps) {
               className="transition-all duration-300 group-hover:r-6"
             />
             {/* Tooltip on hover (simple SVGs approach, better handled by HTML overlay but this works for simple effect) */}
-            <title>{dimensions[i].score}/5</title>
+            <title>{(dimensions[i].score * 5).toFixed(1)}/5</title>
           </g>
         ))}
 

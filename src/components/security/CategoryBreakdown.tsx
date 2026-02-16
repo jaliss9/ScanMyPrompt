@@ -37,9 +37,9 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
     <div className="glass-panel overflow-hidden rounded-xl">
       {/* Table Header */}
       <div className="grid grid-cols-12 gap-4 px-4 py-3 border-b border-white/5 bg-white/[0.02] text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
-        <div className="col-span-5">Category</div>
-        <div className="col-span-4">Risk Score</div>
-        <div className="col-span-3 text-right">Detections</div>
+        <div className="col-span-5">{t(TRANSLATIONS.categoryBreakdown.category)}</div>
+        <div className="col-span-4">{t(TRANSLATIONS.categoryBreakdown.riskScore)}</div>
+        <div className="col-span-3 text-right">{t(TRANSLATIONS.categoryBreakdown.detections)}</div>
       </div>
 
       <div className="divide-y divide-white/5">
@@ -104,7 +104,7 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-bold text-red-400">{t(det.name)}</span>
-                            <span className="text-[10px] text-slate-500">Severity: {Math.round(det.severity * 100)}%</span>
+                            <span className="text-[10px] text-slate-500">{t(TRANSLATIONS.security.severity)}: {Math.round(det.severity * 100)}%</span>
                           </div>
                           <p className="text-xs text-slate-400">{t(det.description)}</p>
                           <div className="mt-1 font-mono text-[10px] text-red-300/80 bg-red-900/10 px-2 py-1 rounded w-fit max-w-full truncate">

@@ -1,24 +1,67 @@
 import { NextResponse } from 'next/server';
+import { sanitizeAiInsightsText } from '@/utils/aiInsights';
 
-function sanitizeModelText(text: string): string {
-  return text
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-    .replace(/<\/?[^>]+(>|$)/g, '')
-    // Keep \n, \r and \t to preserve markdown structure/readability.
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
-    .trim()
-    .slice(0, 6000);
+// ---------------------------------------------------------------------------
+// Simple in-memory rate limiter (per-IP, sliding window)
+// ---------------------------------------------------------------------------
+const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
+const RATE_LIMIT_MAX = 10; // max requests per window
+
+const ipHits = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+  if (hits.length >= RATE_LIMIT_MAX) {
+    ipHits.set(ip, hits);
+    return true;
+  }
+  hits.push(now);
+  ipHits.set(ip, hits);
+  return false;
 }
+
+// Periodically prune stale entries to avoid unbounded memory growth
+setInterval(() => {
+  const now = Date.now();
+  for (const [ip, hits] of ipHits) {
+    const fresh = hits.filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
+    if (fresh.length === 0) ipHits.delete(ip);
+    else ipHits.set(ip, fresh);
+  }
+}, RATE_LIMIT_WINDOW_MS * 2);
+
+// ---------------------------------------------------------------------------
+const MAX_PROMPT_LENGTH = 8_000; // characters
 
 export async function POST(request: Request) {
   try {
+    // --- Rate limiting ---
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded?.split(',')[0]?.trim() ?? 'unknown';
+    if (isRateLimited(ip)) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 },
+      );
+    }
+
     const apiKey = process.env.GROQ_API_KEY;
 
     if (!apiKey) {
       return NextResponse.json({ insights: null });
     }
 
-    const { prompt, language, riskScore, qualityScore } = await request.json();
+    const body = await request.json();
+    const { language, riskScore, qualityScore } = body;
+    let { prompt } = body;
+
+    if (!prompt || typeof prompt !== 'string') {
+      return NextResponse.json({ insights: null });
+    }
+
+    // --- Input size limit ---
+    prompt = prompt.slice(0, MAX_PROMPT_LENGTH);
 
     if (!prompt) {
       return NextResponse.json({ insights: null });
@@ -82,7 +125,7 @@ Use exactly this structure:
 
     const data = await res.json();
     const rawInsights = data.choices?.[0]?.message?.content ?? null;
-    const insights = rawInsights ? sanitizeModelText(rawInsights) : null;
+    const insights = rawInsights ? sanitizeAiInsightsText(rawInsights, 6000) : null;
 
     return NextResponse.json({ insights });
   } catch (error) {

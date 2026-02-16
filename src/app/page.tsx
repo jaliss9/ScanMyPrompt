@@ -8,7 +8,6 @@ import { Verdict } from '@/components/Verdict';
 import { AIInsights } from '@/components/AIInsights';
 import { ResultsTabs } from '@/components/ResultsTabs';
 import { Footer } from '@/components/Footer';
-import { ScanningOverlay } from '@/components/ScanningOverlay';
 import { PatternCounter } from '@/components/PatternCounter';
 import { IconBadge } from '@/components/ui/IconBadge';
 import { ZapIcon, CheckCircleIcon, SparklesIcon } from '@/components/ui/Icons';
@@ -16,6 +15,8 @@ import { useAnalysis } from '@/hooks/useAnalysis';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { useToast } from '@/components/Toast';
+import { extractImprovedPromptFromInsights } from '@/utils/aiInsights';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 const loadExampleLibrary = () => import('@/components/ExampleLibrary');
 const loadEducationSection = () => import('@/components/EducationSection');
@@ -28,28 +29,9 @@ const EducationSection = dynamic(() => loadEducationSection().then((m) => m.Educ
   ssr: false,
 });
 
-function extractImprovedPromptFromInsights(insights: string): string | null {
-  const lines = insights.split('\n');
-  const headingPattern = /^\s*(#{2,4}\s*)?(version améliorée du prompt|improved prompt version)\s*$/i;
-  const nextHeadingPattern = /^\s*#{2,4}\s+\S+/;
-
-  const startIndex = lines.findIndex((line) => headingPattern.test(line.trim()));
-  if (startIndex === -1) return null;
-
-  const collected: string[] = [];
-  for (let i = startIndex + 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (nextHeadingPattern.test(line.trim())) break;
-    collected.push(line);
-  }
-
-  const extracted = collected.join('\n').trim();
-  return extracted.length > 0 ? extracted : null;
-}
-
 export default function Home() {
   const { language, t } = useLanguage();
-  const { prompt, setPrompt, result, isAnalyzing, scanProgress, aiInsights, isAiLoading, analyze, clear, loadExample } = useAnalysis();
+  const { prompt, setPrompt, result, isAnalyzing, aiInsights, isAiLoading, analyze, clear, loadExample } = useAnalysis();
   const { showToast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [showExtended, setShowExtended] = useState(false);
@@ -87,7 +69,7 @@ export default function Home() {
     }
   }, [result?.timestamp]);
 
-  // Handle shared URL parameter
+  // Handle shared URL parameter — load the prompt but let the user decide to analyze
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const p = params.get('p');
@@ -95,11 +77,10 @@ export default function Home() {
       try {
         const decoded = decodeURIComponent(atob(p));
         setPrompt(decoded);
-        setTimeout(() => {
-          analyze(decoded, language);
-        }, 100);
+        // Remove the query param from the URL to avoid re-loading on refresh
+        window.history.replaceState({}, '', window.location.pathname);
       } catch {
-        // Invalid parameter
+        // Invalid parameter — ignore silently
       }
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -111,22 +92,21 @@ export default function Home() {
 
   const hasImprovedPrompt = !!result && result.quality.improvedVersion !== result.prompt;
 
-  const handleCopyImproved = useCallback(() => {
+  const handleCopyImproved = useCallback(async () => {
     if (!result) return;
     const improvedFromInsights = aiInsights
       ? extractImprovedPromptFromInsights(aiInsights)
       : null;
     const textToCopy = improvedFromInsights ?? result.quality.improvedVersion;
-    navigator.clipboard.writeText(textToCopy);
-    showToast(t(TRANSLATIONS.security.copied));
+    const copied = await copyTextToClipboard(textToCopy);
+    if (copied) {
+      showToast(t(TRANSLATIONS.security.copied));
+    }
   }, [aiInsights, result, showToast, t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030305]">
       <Header />
-
-      {/* Scanning Overlay */}
-      <ScanningOverlay isVisible={isAnalyzing} progress={scanProgress} />
 
       <main className="flex-1 flex flex-col">
         {/* HERO + PROMPT + RESULTS — all in one flow */}
@@ -185,6 +165,7 @@ export default function Home() {
                   result={result}
                   showDetails={showDetails}
                   onToggleDetails={() => setShowDetails((v) => !v)}
+                  detailsPanelId="analysis-details"
                 />
 
                 {/* AI Insights — between verdict and details */}
@@ -194,11 +175,12 @@ export default function Home() {
                   onCopyImproved={hasImprovedPrompt ? handleCopyImproved : undefined}
                   onToggleDetails={() => setShowDetails((v) => !v)}
                   showDetails={showDetails}
+                  detailsPanelId="analysis-details"
                 />
 
                 {/* Details panel — hidden by default */}
                 {showDetails && (
-                  <div className="animate-fade-in">
+                  <div id="analysis-details" className="animate-fade-in">
                     <ResultsTabs result={result} />
                   </div>
                 )}

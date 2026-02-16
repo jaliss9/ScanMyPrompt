@@ -5,6 +5,7 @@ import { TRANSLATIONS } from '@/config/i18n';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EMPTY_SAFE_VERSION } from '@/engine/security/sanitizer';
 import { useToast } from '@/components/Toast';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 interface SafeRewriteProps {
   original: string;
@@ -17,9 +18,11 @@ export function SafeRewrite({ original, sanitized }: SafeRewriteProps) {
 
   const isEmpty = !sanitized;
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(sanitized);
-    showToast('Safe version copied!');
+  const handleCopy = async () => {
+    const copied = await copyTextToClipboard(sanitized);
+    if (copied) {
+      showToast(t(TRANSLATIONS.security.copied));
+    }
   };
 
   return (

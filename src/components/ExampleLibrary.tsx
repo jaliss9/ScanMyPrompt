@@ -77,13 +77,13 @@ export function ExampleLibrary({ onLoadExample, onAnalyze }: ExampleLibraryProps
               {/* Risk badge */}
               <div className="flex items-center gap-2">
                 <AlertTriangleIcon className="w-4 h-4 text-red-400" />
-                <span className="text-xs text-red-400 font-medium">Risk: {ex.expectedRisk}/5</span>
+                <span className="text-xs text-red-400 font-medium">{t(TRANSLATIONS.examples.risk)}: {ex.expectedRisk}/5</span>
               </div>
 
               {/* Quality badge */}
               <div className="flex items-center gap-2">
                 <SparklesIcon className="w-4 h-4 text-yellow-400" />
-                <span className="text-xs text-yellow-400 font-medium">Quality: {ex.expectedQuality}/5</span>
+                <span className="text-xs text-yellow-400 font-medium">{t(TRANSLATIONS.examples.qualityLabel)}: {ex.expectedQuality}/5</span>
               </div>
             </div>
 

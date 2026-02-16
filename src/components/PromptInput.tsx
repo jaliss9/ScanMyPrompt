@@ -193,6 +193,7 @@ export function PromptInput({
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               onKeyDown={handleKeyDown}
+              aria-label={t(TRANSLATIONS.input.placeholder)}
               className="w-full bg-transparent text-white placeholder-transparent focus:outline-none focus:ring-0 text-base sm:text-xl leading-relaxed resize-none scrollbar-hide border-none relative z-10"
               placeholder=""
               rows={1}
@@ -214,6 +215,7 @@ export function PromptInput({
                 }
               `}
               title={t(TRANSLATIONS.input.clear)}
+              aria-label={t(TRANSLATIONS.input.clear)}
               type="button"
             >
               <XIcon className="w-5 h-5" />
@@ -233,6 +235,7 @@ export function PromptInput({
                   }
                 `}
                 title={isListening ? t(TRANSLATIONS.input.voiceStop) : t(TRANSLATIONS.input.voiceStart)}
+                aria-label={isListening ? t(TRANSLATIONS.input.voiceStop) : t(TRANSLATIONS.input.voiceStart)}
               >
                 <SignalIcon className="w-6 h-6" />
               </button>
@@ -249,6 +252,8 @@ export function PromptInput({
                   }
                 `}
                 title={t(TRANSLATIONS.input.analyze)}
+                aria-label={t(TRANSLATIONS.input.analyze)}
+                type="button"
               >
                 {isAnalyzing ? (
                   <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />

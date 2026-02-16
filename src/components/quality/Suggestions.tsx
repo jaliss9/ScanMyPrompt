@@ -38,7 +38,7 @@ export function Suggestions({ suggestions }: SuggestionsProps) {
             {t(TRANSLATIONS.quality.noSuggestions)}
           </p>
           <p className="text-xs text-emerald-500/70 mt-1">
-            Your prompt is looking great!
+            {t(TRANSLATIONS.quality.promptLooksGreat)}
           </p>
         </div>
       </GlassCard>

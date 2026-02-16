@@ -5,14 +5,16 @@ import { TRANSLATIONS } from '@/config/i18n';
 import { useToast } from '@/components/Toast';
 import { ScoreBadge } from '@/components/ui/ScoreBadge';
 import type { AnalysisResult } from '@/types';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 interface VerdictProps {
   result: AnalysisResult;
   showDetails: boolean;
   onToggleDetails: () => void;
+  detailsPanelId?: string;
 }
 
-export function Verdict({ result, showDetails, onToggleDetails }: VerdictProps) {
+export function Verdict({ result, showDetails, onToggleDetails, detailsPanelId }: VerdictProps) {
   const { t } = useLanguage();
   const { showToast } = useToast();
 
@@ -24,9 +26,11 @@ export function Verdict({ result, showDetails, onToggleDetails }: VerdictProps) 
   const qualityPercent = Math.round((result.quality.qualityScore / 5) * 100);
   const hasImprovedVersion = result.quality.improvedVersion !== result.prompt;
 
-  const handleCopyImproved = () => {
-    navigator.clipboard.writeText(result.quality.improvedVersion);
-    showToast(t(TRANSLATIONS.security.copied));
+  const handleCopyImproved = async () => {
+    const copied = await copyTextToClipboard(result.quality.improvedVersion);
+    if (copied) {
+      showToast(t(TRANSLATIONS.security.copied));
+    }
   };
 
   return (
@@ -88,6 +92,8 @@ export function Verdict({ result, showDetails, onToggleDetails }: VerdictProps) 
         {/* Toggle details button */}
         <button
           onClick={onToggleDetails}
+          aria-expanded={showDetails}
+          aria-controls={detailsPanelId}
           className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
         >
           <span>{showDetails ? t(TRANSLATIONS.verdict.hideDetails) : t(TRANSLATIONS.verdict.seeDetails)}</span>

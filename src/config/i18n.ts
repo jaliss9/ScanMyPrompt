@@ -74,6 +74,7 @@ export const TRANSLATIONS = {
     copyPrompt: { en: 'Copy prompt', fr: 'Copier le prompt' },
     copied: { en: 'Copied!', fr: 'Copié !' },
     legend: { en: 'Legend', fr: 'Légende' },
+    severity: { en: 'Severity', fr: 'Sévérité' },
     riskLabels: {
       1: { en: 'Safe', fr: 'Sûr' },
       2: { en: 'Low Risk', fr: 'Risque faible' },
@@ -101,6 +102,19 @@ export const TRANSLATIONS = {
       5: { en: 'Excellent', fr: 'Excellent' },
     },
     findings: { en: 'Findings', fr: 'Observations' },
+    promptLooksGreat: { en: 'Your prompt is looking great!', fr: 'Votre prompt est excellent !' },
+  },
+  patternCounter: {
+    patternsVerified: { en: 'Security Patterns Verified', fr: 'Motifs de sécurité vérifiés' },
+    owaspAnalyzed: { en: 'OWASP categories analyzed', fr: 'catégories OWASP analysées' },
+    noIssues: { en: 'No issues', fr: 'Aucun problème' },
+    issueFound: { en: 'Issue found', fr: 'Problème détecté' },
+    issuesFound: { en: 'Issues found', fr: 'Problèmes détectés' },
+  },
+  categoryBreakdown: {
+    category: { en: 'Category', fr: 'Catégorie' },
+    riskScore: { en: 'Risk Score', fr: 'Score de risque' },
+    detections: { en: 'Detections', fr: 'Détections' },
   },
   categories: {
     system_prompt_override: {

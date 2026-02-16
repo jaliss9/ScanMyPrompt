@@ -4,6 +4,8 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { SparklesIcon } from '@/components/ui/Icons';
 import { useToast } from '@/components/Toast';
+import { sanitizeAiInsightsText } from '@/utils/aiInsights';
+import { copyTextToClipboard } from '@/utils/clipboard';
 
 interface AIInsightsProps {
   insights: string | null;
@@ -11,15 +13,7 @@ interface AIInsightsProps {
   onCopyImproved?: () => void;
   onToggleDetails?: () => void;
   showDetails?: boolean;
-}
-
-function sanitizeInsightsText(text: string): string {
-  return text
-    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
-    .replace(/<\/?[^>]+(>|$)/g, '')
-    // Keep \n, \r and \t to preserve markdown structure/readability.
-    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '')
-    .trim();
+  detailsPanelId?: string;
 }
 
 function MarkdownRenderer({ text }: { text: string }) {
@@ -166,17 +160,20 @@ export function AIInsights({
   onCopyImproved,
   onToggleDetails,
   showDetails = false,
+  detailsPanelId,
 }: AIInsightsProps) {
   const { t } = useLanguage();
   const { showToast } = useToast();
 
   if (!isLoading && !insights) return null;
-  const safeInsights = insights ? sanitizeInsightsText(insights) : '';
+  const safeInsights = insights ? sanitizeAiInsightsText(insights) : '';
 
-  const handleCopyInsights = () => {
+  const handleCopyInsights = async () => {
     if (!safeInsights) return;
-    navigator.clipboard.writeText(safeInsights);
-    showToast(t(TRANSLATIONS.security.copied));
+    const copied = await copyTextToClipboard(safeInsights);
+    if (copied) {
+      showToast(t(TRANSLATIONS.security.copied));
+    }
   };
 
   return (
@@ -218,6 +215,8 @@ export function AIInsights({
               <button
                 type="button"
                 onClick={onToggleDetails}
+                aria-expanded={showDetails}
+                aria-controls={detailsPanelId}
                 className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
               >
                 {showDetails ? t(TRANSLATIONS.verdict.hideDetails) : t(TRANSLATIONS.verdict.seeDetails)}

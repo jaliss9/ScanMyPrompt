@@ -146,7 +146,9 @@ export const SECURITY_PATTERNS: Pattern[] = [
   // ===== JAILBREAK (10 patterns) =====
   {
     id: 'jb-1',
-    regex: /\bDAN\b|Do\s+Anything\s+Now/gi,
+    // \bDAN\b is case-sensitive (uppercase only) to avoid matching the name "Dan"
+    // "Do Anything Now" stays case-insensitive
+    regex: /\bDAN\b|Do\s+Anything\s+Now/g,
     category: 'jailbreak',
     severity: 0.9,
     name: {
@@ -558,7 +560,8 @@ export const SECURITY_PATTERNS: Pattern[] = [
   // ===== ENCODING & OBFUSCATION (9 patterns) =====
   {
     id: 'eo-1',
-    regex: /[A-Za-z0-9+/]{20,}={0,2}/g,
+    // Require 40+ chars with trailing = padding to reliably identify base64 and reduce false positives
+    regex: /[A-Za-z0-9+/]{40,}={1,2}/g,
     category: 'encoding_obfuscation',
     severity: 0.5,
     name: {
