@@ -168,8 +168,6 @@ export default function Home() {
                 <Verdict
                   result={result}
                   showDetails={showDetails}
-                  onToggleDetails={() => setShowDetails((v) => !v)}
-                  detailsPanelId="analysis-details"
                 />
 
                 {/* AI Insights — between verdict and details */}
@@ -177,9 +175,6 @@ export default function Home() {
                   insights={aiInsights}
                   isLoading={isAiLoading}
                   onCopyImproved={hasImprovedPrompt ? handleCopyImproved : undefined}
-                  onToggleDetails={() => setShowDetails((v) => !v)}
-                  showDetails={showDetails}
-                  detailsPanelId="analysis-details"
                   showUnavailable={!!result && !isAiLoading && !aiInsights}
                 />
 
@@ -331,10 +326,6 @@ export default function Home() {
         )}
       </main>
 
-      <div className="pb-4 text-center">
-        <span className="text-[11px] text-slate-500">{t(TRANSLATIONS.ai.poweredBy)}</span>
-      </div>
-
       <button
         type="button"
         onClick={() => setShowExtended((v) => !v)}
@@ -344,6 +335,20 @@ export default function Home() {
           ? language === 'fr' ? 'Mode épuré' : 'Compact mode'
           : language === 'fr' ? 'Mode complet' : 'Full mode'}
       </button>
+
+      {result && (
+        <button
+          type="button"
+          onClick={() => setShowDetails((v) => !v)}
+          aria-expanded={showDetails}
+          aria-controls="analysis-details"
+          className="fixed right-4 bottom-16 z-40 px-3 py-2 text-xs font-medium text-slate-200 bg-black/50 border border-white/15 rounded-lg backdrop-blur-md hover:bg-black/65 transition-colors"
+        >
+          {showDetails
+            ? t(TRANSLATIONS.verdict.hideDetails)
+            : t(TRANSLATIONS.verdict.seeDetails)}
+        </button>
+      )}
 
       <Footer />
     </div>

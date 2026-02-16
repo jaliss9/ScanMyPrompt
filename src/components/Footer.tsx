@@ -13,6 +13,7 @@ export function Footer() {
           {t(TRANSLATIONS.footer.disclaimer)}
         </p>
         <p className="text-sm text-gray-500">{t(TRANSLATIONS.footer.builtBy)}</p>
+        <p className="mt-2 text-[11px] text-gray-600">{t(TRANSLATIONS.ai.poweredBy)}</p>
       </div>
     </footer>
   );

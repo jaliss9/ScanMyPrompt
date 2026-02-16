@@ -11,7 +11,7 @@ import { copyTextToClipboard } from '@/utils/clipboard';
 interface VerdictProps {
   result: AnalysisResult;
   showDetails: boolean;
-  onToggleDetails: () => void;
+  onToggleDetails?: () => void;
   detailsPanelId?: string;
 }
 
@@ -93,23 +93,25 @@ export function Verdict({ result, showDetails, onToggleDetails, detailsPanelId }
           {verdictMessage}
         </p>
 
-        {/* Toggle details button */}
-        <button
-          onClick={onToggleDetails}
-          aria-expanded={showDetails}
-          aria-controls={detailsPanelId}
-          className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
-        >
-          <span>{showDetails ? t(TRANSLATIONS.verdict.hideDetails) : t(TRANSLATIONS.verdict.seeDetails)}</span>
-          <svg
-            className={`w-4 h-4 transition-transform duration-300 ${showDetails ? 'rotate-180' : ''}`}
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
+        {/* Toggle details button (optional, can be controlled globally from page) */}
+        {onToggleDetails && (
+          <button
+            onClick={onToggleDetails}
+            aria-expanded={showDetails}
+            aria-controls={detailsPanelId}
+            className="flex items-center gap-2 text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
+            <span>{showDetails ? t(TRANSLATIONS.verdict.hideDetails) : t(TRANSLATIONS.verdict.seeDetails)}</span>
+            <svg
+              className={`w-4 h-4 transition-transform duration-300 ${showDetails ? 'rotate-180' : ''}`}
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+        )}
       </div>
     </div>
   );
