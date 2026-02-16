@@ -62,14 +62,18 @@ export default function Home() {
       void loadEducationSection();
     };
 
-    if (typeof window === 'undefined') return;
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(preload, { timeout: 1400 });
-      return () => window.cancelIdleCallback(id);
+    const idleApi = globalThis as typeof globalThis & {
+      requestIdleCallback?: (callback: IdleRequestCallback, options?: IdleRequestOptions) => number;
+      cancelIdleCallback?: (handle: number) => void;
+    };
+
+    if (typeof idleApi.requestIdleCallback === 'function' && typeof idleApi.cancelIdleCallback === 'function') {
+      const id = idleApi.requestIdleCallback(preload, { timeout: 1400 });
+      return () => idleApi.cancelIdleCallback!(id);
     }
 
-    const timeout = window.setTimeout(preload, 700);
-    return () => window.clearTimeout(timeout);
+    const timeout = setTimeout(preload, 700);
+    return () => clearTimeout(timeout);
   }, []);
 
   // Scroll to verdict when a new result arrives

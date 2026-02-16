@@ -1,14 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ToastProvider } from "@/components/Toast";
 import { LovableBackground } from "@/components/ui/LovableBackground";
-
-const inter = Inter({
-  variable: "--font-inter",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "ScanMyPrompt",
@@ -22,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} antialiased`}>
+      <body className="antialiased">
         <LanguageProvider>
           <ToastProvider>
             {/* Main wrapper - Dark theme base to match Lovable background */}

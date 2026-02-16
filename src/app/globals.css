@@ -26,7 +26,7 @@
   --color-glass-bg: rgba(10, 10, 10, 0.8);
   --color-glass-border: rgba(255, 255, 255, 0.1);
 
-  --font-sans: var(--font-inter);
+  --font-sans: "Sora", "Space Grotesk", "Manrope", "Segoe UI", "Helvetica Neue", "Arial", sans-serif;
   --font-mono: 'JetBrains Mono', 'Geist Mono', monospace;
 }
 
