@@ -3,6 +3,7 @@
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { GlassCard } from '@/components/ui/GlassCard';
+import { useToast } from '@/components/Toast';
 import type { HighlightRange, SecurityCategory } from '@/types';
 
 interface HighlightedPromptProps {
@@ -30,8 +31,14 @@ const CATEGORY_DOT_COLORS: Record<SecurityCategory, string> = {
 
 export function HighlightedPrompt({ prompt, ranges }: HighlightedPromptProps) {
   const { t } = useLanguage();
+  const { showToast } = useToast();
 
   if (ranges.length === 0) return null;
+
+  const handleCopyPrompt = () => {
+    navigator.clipboard.writeText(prompt);
+    showToast(t(TRANSLATIONS.security.copied));
+  };
 
   // Build segments
   const segments: { text: string; range?: HighlightRange }[] = [];
@@ -57,11 +64,20 @@ export function HighlightedPrompt({ prompt, ranges }: HighlightedPromptProps) {
 
   return (
     <GlassCard className="border-red-500/20 bg-gradient-to-br from-red-900/10 to-transparent">
-      <div className="flex items-center gap-2 mb-4">
-        <span className="w-1 h-5 rounded-full bg-red-500" />
-        <h3 className="text-sm font-bold text-slate-200 tracking-wide uppercase">
-          {t(TRANSLATIONS.security.highlightedPrompt)}
-        </h3>
+      <div className="flex items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-1 h-5 rounded-full bg-red-500" />
+          <h3 className="text-sm font-bold text-slate-200 tracking-wide uppercase">
+            {t(TRANSLATIONS.security.highlightedPrompt)}
+          </h3>
+        </div>
+        <button
+          type="button"
+          onClick={handleCopyPrompt}
+          className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
+        >
+          {t(TRANSLATIONS.security.copyPrompt)}
+        </button>
       </div>
 
       <div className="bg-[#050510] border border-white/5 rounded-xl p-5 text-sm leading-7 font-mono relative overflow-hidden">

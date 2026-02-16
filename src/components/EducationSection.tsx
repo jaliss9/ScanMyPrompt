@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { ShieldAlertIcon, CheckCircleIcon, ChevronDownIcon } from '@/components/ui/Icons';
@@ -24,37 +25,37 @@ function ExpandableCard({
   return (
     <button
       onClick={() => setOpen(!open)}
-      className="group relative bg-white border border-gray-200 rounded-2xl p-6 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-[1.02] text-left overflow-hidden w-full"
+      className="group relative bg-[#111111] border border-[#222] rounded-2xl p-6 shadow-sm hover:bg-[#151515] hover:border-[#333] transition-all duration-300 text-left overflow-hidden w-full"
     >
       {/* Card Content */}
-      <div className="p-6">
+      <div className="relative z-10">
         {/* Icon + Title */}
         <div className="flex items-start gap-4 mb-3">
-          <div className={`flex-shrink-0 p-3 rounded-xl group-hover:scale-110 transition-transform ${iconBgClass}`}>
+          <div className={`flex-shrink-0 p-3 rounded-xl group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 ${iconBgClass}`}>
             {icon}
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-base font-semibold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+            <h3 className="text-base font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors">
               {title}
             </h3>
           </div>
           <ChevronDownIcon
-            className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${open ? 'rotate-180' : ''
+            className={`w-5 h-5 text-gray-500 transition-transform duration-300 ${open ? 'rotate-180' : ''
               }`}
           />
         </div>
 
         {/* Description (always visible) */}
         {shortDescription && !open && (
-          <p className="text-sm text-gray-600 leading-relaxed mb-4 animate-fade-in line-clamp-2">
+          <p className="text-sm text-gray-400 leading-relaxed mb-4 animate-fade-in line-clamp-2">
             {shortDescription}
           </p>
         )}
 
         {/* Expandable Details */}
         {open && (
-          <div className="pt-4 border-t border-blue-100/50 animate-slide-down">
-            <div className="space-y-3 text-sm text-gray-700">
+          <div className="pt-4 border-t border-[#222] animate-slide-down">
+            <div className="space-y-4 text-sm text-gray-300">
               {children}
             </div>
           </div>
@@ -67,48 +68,63 @@ function ExpandableCard({
   );
 }
 
-export function EducationSection() {
+interface EducationSectionProps {
+  showAll?: boolean;
+  showHeader?: boolean;
+}
+
+const PREVIEW_ATTACKS: SecurityCategory[] = [
+  'system_prompt_override',
+  'jailbreak',
+  'data_exfiltration',
+];
+
+const ALL_ATTACKS: SecurityCategory[] = [
+  'system_prompt_override',
+  'jailbreak',
+  'data_exfiltration',
+  'tool_agent_abuse',
+  'encoding_obfuscation',
+  'social_engineering',
+];
+
+const ALL_DIMENSIONS: QualityDimension[] = [
+  'context',
+  'specificity',
+  'structure',
+  'constraints',
+  'clarity',
+  'examples',
+];
+
+export function EducationSection({ showAll = false, showHeader = true }: EducationSectionProps) {
   const { t } = useLanguage();
 
-  const attackCategories: SecurityCategory[] = [
-    'system_prompt_override',
-    'jailbreak',
-    'data_exfiltration',
-    'tool_agent_abuse',
-    'encoding_obfuscation',
-    'social_engineering',
-  ];
-
-  const qualityDimensions: QualityDimension[] = [
-    'context',
-    'specificity',
-    'structure',
-    'constraints',
-    'clarity',
-    'examples',
-  ];
+  const attackCategories = showAll ? ALL_ATTACKS : PREVIEW_ATTACKS;
 
   return (
     <div className="max-w-6xl mx-auto px-4">
-      <div className="mb-12 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2 tracking-tight">
-          {t(TRANSLATIONS.education.title)}
-        </h2>
-        <p className="text-gray-600">
-          Master the art of secure and effective prompt engineering
-        </p>
-      </div>
+      {showHeader && (
+        <div className="mb-12 text-center">
+          <h2 className="text-3xl font-bold text-white mb-4 tracking-tight">
+            {t(TRANSLATIONS.education.title)}
+          </h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            {t(TRANSLATIONS.education.subtitle)}
+          </p>
+        </div>
+      )}
 
       <div className="space-y-16">
         {/* Attacks section */}
         <section>
-          <div className="mb-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200"></div>
-            <h3 className="text-lg font-bold text-red-500 uppercase tracking-widest flex items-center gap-2">
-              <ShieldAlertIcon className="w-5 h-5" />
+          <div className="mb-8 flex items-center gap-4">
+            <div className="h-px flex-1 bg-gray-800"></div>
+            <h3 className="text-sm font-bold text-red-400 uppercase tracking-widest flex items-center gap-2 px-4 py-1 bg-red-400/10 rounded-full border border-red-400/20">
+              <ShieldAlertIcon className="w-4 h-4" />
               {t(TRANSLATIONS.education.attacks.title)}
             </h3>
-            <div className="h-px flex-1 bg-gray-200"></div>
+            <div className="h-px flex-1 bg-gray-800"></div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -119,22 +135,22 @@ export function EducationSection() {
                   key={cat}
                   title={t(info.title)}
                   shortDescription={t(info.definition)}
-                  icon={<ShieldAlertIcon className="w-6 h-6 text-red-600" />}
-                  iconBgClass="bg-gradient-to-br from-red-50 to-red-100/50"
+                  icon={<ShieldAlertIcon className="w-6 h-6 text-white" />}
+                  iconBgClass="bg-gradient-to-br from-red-500 to-pink-600 shadow-lg shadow-red-500/20"
                 >
                   <div>
-                    <span className="font-medium text-gray-900 block mb-1">Definition:</span>
-                    <p className="text-gray-600 leading-relaxed">{t(info.definition)}</p>
+                    <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.definition)}</span>
+                    <p className="text-gray-400 leading-relaxed">{t(info.definition)}</p>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900 block mb-1">Example:</span>
-                    <code className="block p-3 bg-red-50 text-red-600 rounded-lg font-mono text-xs border border-red-100">
+                    <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.example)}</span>
+                    <code className="block p-3 bg-red-950/30 text-red-300 rounded-lg font-mono text-xs border border-red-500/20">
                       {t(info.example)}
                     </code>
                   </div>
                   <div>
-                    <span className="font-medium text-gray-900 block mb-1">Defense:</span>
-                    <p className="text-green-600 font-medium bg-green-50 px-3 py-2 rounded-lg border border-green-100">
+                    <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.defense)}</span>
+                    <p className="text-green-400 font-medium bg-green-950/30 px-3 py-2 rounded-lg border border-green-500/20">
                       {t(info.defense)}
                     </p>
                   </div>
@@ -142,49 +158,62 @@ export function EducationSection() {
               );
             })}
           </div>
+
+          {!showAll && (
+            <div className="text-center mt-12">
+              <Link
+                href="/about#education"
+                className="px-6 py-2.5 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-full transition-colors inline-block"
+              >
+                {t(TRANSLATIONS.education.learnMore)}
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* Best Practices section */}
-        <section>
-          <div className="mb-6 flex items-center gap-3">
-            <div className="h-px flex-1 bg-gray-200"></div>
-            <h3 className="text-lg font-bold text-emerald-500 uppercase tracking-widest flex items-center gap-2">
-              <CheckCircleIcon className="w-5 h-5" />
-              {t(TRANSLATIONS.education.bestPractices.title)}
-            </h3>
-            <div className="h-px flex-1 bg-gray-200"></div>
-          </div>
+        {showAll && (
+          <section>
+            <div className="mb-8 flex items-center gap-4">
+              <div className="h-px flex-1 bg-gray-800"></div>
+              <h3 className="text-sm font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-2 px-4 py-1 bg-emerald-400/10 rounded-full border border-emerald-400/20">
+                <CheckCircleIcon className="w-4 h-4" />
+                {t(TRANSLATIONS.education.bestPractices.title)}
+              </h3>
+              <div className="h-px flex-1 bg-gray-800"></div>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {qualityDimensions.map((dim) => {
-              const info = TRANSLATIONS.education.bestPractices[dim];
-              return (
-                <ExpandableCard
-                  key={dim}
-                  title={t(info.title)}
-                  shortDescription={t(info.why)}
-                  icon={<CheckCircleIcon className="w-6 h-6 text-emerald-600" />}
-                  iconBgClass="bg-gradient-to-br from-emerald-50 to-emerald-100/50"
-                >
-                  <div>
-                    <span className="font-medium text-gray-900 block mb-1">Why it matters:</span>
-                    <p className="text-gray-600 leading-relaxed">{t(info.why)}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-900 block mb-1">How to apply:</span>
-                    <p className="text-gray-600 leading-relaxed">{t(info.how)}</p>
-                  </div>
-                  <div>
-                    <span className="font-medium text-gray-900 block mb-1">Example:</span>
-                    <code className="block p-3 bg-emerald-50 text-emerald-600 rounded-lg font-mono text-xs border border-emerald-100">
-                      {t(info.example)}
-                    </code>
-                  </div>
-                </ExpandableCard>
-              );
-            })}
-          </div>
-        </section>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ALL_DIMENSIONS.map((dim) => {
+                const info = TRANSLATIONS.education.bestPractices[dim];
+                return (
+                  <ExpandableCard
+                    key={dim}
+                    title={t(info.title)}
+                    shortDescription={t(info.why)}
+                    icon={<CheckCircleIcon className="w-6 h-6 text-white" />}
+                    iconBgClass="bg-gradient-to-br from-emerald-500 to-teal-600 shadow-lg shadow-emerald-500/20"
+                  >
+                    <div>
+                      <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.whyItMatters)}</span>
+                      <p className="text-gray-400 leading-relaxed">{t(info.why)}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.howToApply)}</span>
+                      <p className="text-gray-400 leading-relaxed">{t(info.how)}</p>
+                    </div>
+                    <div>
+                      <span className="font-semibold text-white block mb-1">{t(TRANSLATIONS.education.example)}</span>
+                      <code className="block p-3 bg-emerald-950/30 text-emerald-300 rounded-lg font-mono text-xs border border-emerald-500/20">
+                        {t(info.example)}
+                      </code>
+                    </div>
+                  </ExpandableCard>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );

@@ -6,6 +6,16 @@ import { TRANSLATIONS } from '@/config/i18n';
 import { Badge } from '@/components/ui/Badge';
 import type { CategoryScore, SecurityCategory } from '@/types';
 
+// Map categories to OWASP LLM Top 10 references
+const OWASP_REFS: Record<SecurityCategory, { id: string; url: string }> = {
+  system_prompt_override: { id: 'LLM01', url: 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/' },
+  jailbreak: { id: 'LLM01', url: 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/' },
+  data_exfiltration: { id: 'LLM06', url: 'https://genai.owasp.org/llmrisk/llm06-excessive-agency/' },
+  tool_agent_abuse: { id: 'LLM06', url: 'https://genai.owasp.org/llmrisk/llm06-excessive-agency/' },
+  encoding_obfuscation: { id: 'LLM01', url: 'https://genai.owasp.org/llmrisk/llm01-prompt-injection/' },
+  social_engineering: { id: 'LLM09', url: 'https://genai.owasp.org/llmrisk/llm09-misinformation/' },
+};
+
 interface CategoryBreakdownProps {
   categories: CategoryScore[];
 }
@@ -87,20 +97,38 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
               {/* Expanded Details - Dense Table within */}
               {isExpanded && hasDetections && (
                 <div className="bg-[#0A0A0A]/50 border-y border-white/5 px-4 py-3 space-y-2">
-                  {cat.detections.map((det, i) => (
-                    <div key={i} className="flex gap-4 p-2 rounded border border-white/5 bg-white/[0.02]">
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-red-400">{t(det.name)}</span>
-                          <span className="text-[10px] text-slate-500">Severity: {Math.round(det.severity * 100)}%</span>
-                        </div>
-                        <p className="text-xs text-slate-400">{t(det.description)}</p>
-                        <div className="mt-1 font-mono text-[10px] text-red-300/80 bg-red-900/10 px-2 py-1 rounded w-fit max-w-full truncate">
-                          {det.matchedText}
+                  {cat.detections.map((det, i) => {
+                    const owaspRef = OWASP_REFS[cat.category];
+                    return (
+                      <div key={i} className="flex gap-4 p-2 rounded border border-white/5 bg-white/[0.02]">
+                        <div className="flex-1 space-y-1">
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs font-bold text-red-400">{t(det.name)}</span>
+                            <span className="text-[10px] text-slate-500">Severity: {Math.round(det.severity * 100)}%</span>
+                          </div>
+                          <p className="text-xs text-slate-400">{t(det.description)}</p>
+                          <div className="mt-1 font-mono text-[10px] text-red-300/80 bg-red-900/10 px-2 py-1 rounded w-fit max-w-full truncate">
+                            {det.matchedText}
+                          </div>
+                          {/* OWASP Reference Link */}
+                          {owaspRef && (
+                            <a
+                              href={owaspRef.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 mt-1.5 text-[10px] text-blue-400 hover:text-blue-300 font-medium transition-colors"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                              </svg>
+                              OWASP {owaspRef.id}
+                            </a>
+                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
             </div>

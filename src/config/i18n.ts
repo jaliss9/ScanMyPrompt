@@ -1,4 +1,15 @@
 export const TRANSLATIONS = {
+  hero: {
+    title: { en: 'Analyze Your Prompts', fr: 'Analysez vos prompts' },
+    subtitle: {
+      en: 'Detect security risks and improve prompt quality instantly',
+      fr: 'Détectez les risques de sécurité et améliorez la qualité en un clic',
+    },
+    tagline: {
+      en: 'Stop bad prompts before they start',
+      fr: 'Stoppez les mauvais prompts avant qu\'ils ne partent',
+    },
+  },
   header: {
     title: { en: 'ScanMyPrompt', fr: 'ScanMyPrompt' },
     subtitle: {
@@ -9,10 +20,11 @@ export const TRANSLATIONS = {
       en: 'Client-side only',
       fr: 'Côté client uniquement',
     },
-    aboutLink: {
-      en: 'How it works',
-      fr: 'Comment \u00e7a marche',
-    },
+    featuresLink: { en: 'Features', fr: 'Fonctionnalités' },
+    examplesLink: { en: 'Examples', fr: 'Exemples' },
+    learnLink: { en: 'Learn', fr: 'Apprendre' },
+    aboutLink: { en: 'About', fr: 'À propos' },
+    tryFree: { en: 'Try Free', fr: 'Essayer gratuit' },
   },
   input: {
     placeholder: {
@@ -21,8 +33,24 @@ export const TRANSLATIONS = {
     },
     analyze: { en: 'Analyze', fr: 'Analyser' },
     clear: { en: 'Clear', fr: 'Effacer' },
+    voiceInput: { en: 'Voice input', fr: 'Saisie vocale' },
+    voiceUnsupported: { en: 'Voice input is not supported on this browser', fr: 'La saisie vocale n’est pas prise en charge sur ce navigateur' },
+    voiceStart: { en: 'Start voice input', fr: 'Démarrer la saisie vocale' },
+    voiceStop: { en: 'Stop voice input', fr: 'Arrêter la saisie vocale' },
     loadExample: { en: 'Load Example', fr: 'Charger un exemple' },
     analyzing: { en: 'Analyzing...', fr: 'Analyse en cours...' },
+  },
+  scanning: {
+    title: { en: 'Analyzing your prompt...', fr: 'Analyse de votre prompt...' },
+    step1: { en: 'Checking for prompt injection patterns...', fr: 'Vérification des motifs d’injection de prompt...' },
+    step2: { en: 'Analyzing jailbreak techniques...', fr: 'Analyse des techniques de jailbreak...' },
+    step3: { en: 'Scanning data exfiltration risks...', fr: 'Analyse des risques d’exfiltration de données...' },
+    step4: { en: 'Evaluating encoding obfuscation...', fr: 'Évaluation des techniques d’obfuscation...' },
+    step5: { en: 'Detecting social engineering...', fr: 'Détection de l’ingénierie sociale...' },
+    step6: { en: 'Assessing prompt quality dimensions...', fr: 'Évaluation des dimensions de qualité du prompt...' },
+    step7: { en: 'Generating improvement suggestions...', fr: 'Génération de suggestions d’amélioration...' },
+    step8: { en: 'Compiling results...', fr: 'Compilation des résultats...' },
+    patternsChecked: { en: 'patterns checked', fr: 'motifs vérifiés' },
   },
   tabs: {
     security: { en: 'Security', fr: 'Sécurité' },
@@ -43,6 +71,7 @@ export const TRANSLATIONS = {
     original: { en: 'Original', fr: 'Original' },
     sanitized: { en: 'Sanitized', fr: 'Assaini' },
     copyClean: { en: 'Copy Clean Version', fr: 'Copier la version nettoyée' },
+    copyPrompt: { en: 'Copy prompt', fr: 'Copier le prompt' },
     copied: { en: 'Copied!', fr: 'Copié !' },
     legend: { en: 'Legend', fr: 'Légende' },
     riskLabels: {
@@ -161,6 +190,32 @@ export const TRANSLATIONS = {
       },
     },
   },
+  features: {
+    title: { en: 'Why ScanMyPrompt?', fr: 'Pourquoi ScanMyPrompt ?' },
+    subtitle: {
+      en: 'Instant analysis, OWASP-aligned checks, and actionable improvements.',
+      fr: 'Analyse instantanée, contrôles OWASP et améliorations concrètes.',
+    },
+    instantTitle: { en: 'Instant analysis', fr: 'Analyse instantanée' },
+    instantDesc: {
+      en: 'Paste your prompt and get security and quality results in seconds—no signup required.',
+      fr: 'Collez votre prompt et obtenez les résultats en quelques secondes—sans inscription.',
+    },
+    owaspTitle: { en: 'OWASP-aligned', fr: 'Aligné OWASP' },
+    owaspDesc: {
+      en: 'Detection based on OWASP LLM Top 10 and common prompt injection patterns.',
+      fr: 'Détection basée sur le Top 10 OWASP LLM et les patterns d\'injection courants.',
+    },
+    autoTitle: { en: 'Actionable improvements', fr: 'Améliorations concrètes' },
+    autoDesc: {
+      en: 'Get safe rewrites and quality suggestions to harden and refine your prompts.',
+      fr: 'Obtenez des réécritures sûres et des suggestions pour renforcer et affiner vos prompts.',
+    },
+    security: { en: 'Security', fr: 'Sécurité' },
+    quality: { en: 'Quality', fr: 'Qualité' },
+    privacy: { en: 'Privacy', fr: 'Confidentialité' },
+    bilingual: { en: 'EN / FR', fr: 'EN / FR' },
+  },
   examples: {
     title: { en: 'Example Prompts', fr: 'Exemples de prompts' },
     tryThis: { en: 'Try this', fr: 'Essayer' },
@@ -173,9 +228,36 @@ export const TRANSLATIONS = {
     },
     risk: { en: 'Risk', fr: 'Risque' },
     qualityLabel: { en: 'Quality', fr: 'Qualité' },
+    showMore: { en: 'Show more examples', fr: 'Voir plus d\'exemples' },
+    showLess: { en: 'Show less', fr: 'Voir moins' },
+  },
+  verdict: {
+    analysisComplete: { en: 'Analysis Complete', fr: 'Analyse terminée' },
+    riskLabel: { en: 'Risk', fr: 'Risque' },
+    qualityLabel: { en: 'Quality', fr: 'Qualité' },
+    safe: {
+      en: 'Your prompt looks safe with no significant security risks detected.',
+      fr: 'Votre prompt semble sûr, aucun risque de sécurité significatif détecté.',
+    },
+    risky: {
+      en: 'Security risks detected — review the highlighted zones and consider the safe rewrite.',
+      fr: 'Risques de sécurité détectés — examinez les zones surlignées et envisagez la réécriture sécurisée.',
+    },
+    seeDetails: { en: 'See full analysis', fr: 'Voir l\'analyse complète' },
+    hideDetails: { en: 'Hide details', fr: 'Masquer les détails' },
   },
   education: {
     title: { en: 'Learn More', fr: 'En savoir plus' },
+    subtitle: {
+      en: 'Master the art of secure and effective prompt engineering',
+      fr: 'Maîtrisez l\'art de l\'ingénierie de prompt sécurisée et efficace',
+    },
+    learnMore: { en: 'Explore all topics', fr: 'Explorer tous les sujets' },
+    definition: { en: 'Definition:', fr: 'Définition :' },
+    example: { en: 'Example:', fr: 'Exemple :' },
+    defense: { en: 'Defense:', fr: 'Défense :' },
+    whyItMatters: { en: 'Why it matters:', fr: 'Pourquoi c\'est important :' },
+    howToApply: { en: 'How to apply:', fr: 'Comment appliquer :' },
     attacks: {
       title: { en: 'Prompt Injection Attacks', fr: 'Attaques par injection de prompt' },
       system_prompt_override: {
@@ -387,26 +469,64 @@ export const TRANSLATIONS = {
     running: { en: 'Running...', fr: 'En cours...' },
     result: { en: 'LLM Analysis Result', fr: 'Résultat de l\'analyse LLM' },
   },
+  ai: {
+    title: { en: 'AI Analysis', fr: 'Analyse IA' },
+    loading: {
+      en: 'AI is analyzing your prompt...',
+      fr: 'L\'IA analyse votre prompt...',
+    },
+    copyAnalysis: {
+      en: 'Copy analysis',
+      fr: 'Copier l’analyse',
+    },
+    poweredBy: {
+      en: 'Powered by Llama 3 via Groq',
+      fr: 'Propulsé par Llama 3 via Groq',
+    },
+    error: {
+      en: 'AI analysis unavailable',
+      fr: 'Analyse IA indisponible',
+    },
+  },
+  typewriter: {
+    phrases: {
+      en: [
+        'Detect prompt injection and jailbreak attempts before I send this...',
+        'Highlight risky instructions and propose a safer rewrite...',
+        'Score this prompt for clarity, constraints, and specificity...',
+        'Find data exfiltration patterns and suspicious encoding tricks...',
+        'Improve this prompt while keeping the original intent...',
+      ],
+      fr: [
+        'Détecte les injections de prompt et tentatives de jailbreak avant envoi...',
+        'Surligne les instructions risquées et propose une réécriture sûre...',
+        'Note ce prompt sur la clarté, les contraintes et la spécificité...',
+        'Repère les motifs d’exfiltration et les encodages suspects...',
+        'Améliore ce prompt sans changer son intention...',
+      ],
+    },
+  },
   footer: {
     disclaimer: {
-      en: 'ScanMyPrompt uses heuristic pattern matching. It is not a substitute for comprehensive security testing or professional prompt engineering review.',
-      fr: 'ScanMyPrompt utilise la correspondance de motifs heuristiques. Il ne remplace pas un test de sécurité complet ni une revue professionnelle d\'ingénierie de prompt.',
+      en: 'ScanMyPrompt combines heuristic pattern matching with AI-powered analysis (Llama 3 via Groq) to detect security risks and improve prompt quality. It is not a substitute for comprehensive security testing.',
+      fr: 'ScanMyPrompt combine la correspondance de motifs heuristiques avec une analyse propulsée par IA (Llama 3 via Groq) pour détecter les risques de sécurité et améliorer la qualité des prompts. Il ne remplace pas un test de sécurité complet.',
     },
-    builtBy: { en: 'Built by Jal', fr: 'Créé par Jal' },
+    builtBy: { en: 'J-2026', fr: 'J-2026' },
   },
   meta: {
     title: { en: 'ScanMyPrompt — AI Prompt Security & Quality Analyzer', fr: 'ScanMyPrompt — Analyseur de Sécurité & Qualité de Prompts IA' },
     description: {
-      en: 'Analyze your LLM prompts for security vulnerabilities and quality improvements. Client-side, bilingual (EN/FR), free.',
-      fr: 'Analysez vos prompts LLM pour les vulnérabilités de sécurité et les améliorations de qualité. Côté client, bilingue (EN/FR), gratuit.',
+      en: 'Analyze your LLM prompts for security vulnerabilities and quality improvements. Private and free.',
+      fr: 'Analysez vos prompts LLM pour les vulnérabilités de sécurité et les améliorations de qualité. Privé et gratuit.',
     },
   },
   about: {
     backToTool: { en: '\u2190 Back to analyzer', fr: '\u2190 Retour \u00e0 l\u2019analyseur' },
+    pageTitle: { en: 'About ScanMyPrompt', fr: 'À propos de ScanMyPrompt' },
     title: { en: 'How ScanMyPrompt Works', fr: 'Comment fonctionne ScanMyPrompt' },
     subtitle: {
-      en: 'A free, privacy-first tool that analyzes your LLM prompts for security vulnerabilities and quality improvements \u2014 entirely in your browser, in English and French.',
-      fr: 'Un outil gratuit ax\u00e9 sur la vie priv\u00e9e qui analyse tes prompts LLM pour les vuln\u00e9rabilit\u00e9s de s\u00e9curit\u00e9 et les am\u00e9liorations de qualit\u00e9 \u2014 enti\u00e8rement dans ton navigateur, en fran\u00e7ais et en anglais.',
+      en: 'A free, privacy-first tool that analyzes your LLM prompts for security vulnerabilities and quality improvements \u2014 entirely in your browser.',
+      fr: 'Un outil gratuit ax\u00e9 sur la vie priv\u00e9e qui analyse tes prompts LLM pour les vuln\u00e9rabilit\u00e9s de s\u00e9curit\u00e9 et les am\u00e9liorations de qualit\u00e9 \u2014 enti\u00e8rement dans ton navigateur.',
     },
     whyTitle: { en: 'Why this tool?', fr: 'Pourquoi cet outil ?' },
     whyDesc: {
@@ -462,11 +582,29 @@ export const TRANSLATIONS = {
     },
     forWhoTitle: { en: 'Who is it for?', fr: '\u00c0 qui s\u2019adresse cet outil ?' },
     forWhoDesc: {
-      en: 'Educators teaching AI safety, product teams hardening LLM integrations, indie developers building with APIs, French and EU practitioners needing bilingual tooling, and anyone who wants to write better prompts.',
-      fr: 'Les \u00e9ducateurs enseignant la s\u00e9curit\u00e9 IA, les \u00e9quipes produit s\u00e9curisant leurs int\u00e9grations LLM, les d\u00e9veloppeurs ind\u00e9pendants utilisant des API, les praticiens fran\u00e7ais et europ\u00e9ens ayant besoin d\u2019outils bilingues, et toute personne souhaitant \u00e9crire de meilleurs prompts.',
+      en: 'Educators teaching AI safety, product teams hardening LLM integrations, indie developers building with APIs, and anyone who wants to write better prompts.',
+      fr: 'Les \u00e9ducateurs enseignant la s\u00e9curit\u00e9 IA, les \u00e9quipes produit s\u00e9curisant leurs int\u00e9grations LLM, les d\u00e9veloppeurs ind\u00e9pendants utilisant des API, et toute personne souhaitant \u00e9crire de meilleurs prompts.',
     },
     techTitle: { en: 'Tech Stack', fr: 'Stack technique' },
-    cta: { en: 'Try it now', fr: 'Essayer maintenant' },
+    heroSubtitle: {
+      en: 'Your first line of defense against prompt injection attacks. Built on industry standards, designed for everyone.',
+      fr: 'Votre première ligne de défense contre les attaques par injection de prompt. Basé sur les standards du secteur, conçu pour tous.',
+    },
+    statsPatterns: { en: 'Security Patterns', fr: 'Motifs de sécurité' },
+    statsCategories: { en: 'Attack Categories', fr: 'Catégories d\'attaque' },
+    statsDimensions: { en: 'Quality Dimensions', fr: 'Dimensions de qualité' },
+    statsRate: { en: 'Detection Rate', fr: 'Taux de détection' },
+    learnMoreTitle: { en: 'Learn More', fr: 'En savoir plus' },
+    learnMoreSubtitle: {
+      en: 'Master the art of secure and effective prompt engineering',
+      fr: 'Maîtrisez l\'art de l\'ingénierie de prompt sécurisée et efficace',
+    },
+    ctaTitle: { en: 'Ready to Test Your Prompts?', fr: 'Prêt à tester vos prompts ?' },
+    ctaSubtitle: {
+      en: 'Start analyzing in seconds. No signup required, completely free.',
+      fr: 'Analysez en quelques secondes. Pas d\'inscription, entièrement gratuit.',
+    },
+    cta: { en: 'Try It Now', fr: 'Essayer maintenant' },
   },
 } as const;
 

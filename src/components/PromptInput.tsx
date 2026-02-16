@@ -1,6 +1,45 @@
 'use client';
 
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useRef, useEffect, useMemo, useState } from 'react';
+import { XIcon, ArrowUpIcon, SignalIcon } from '@/components/ui/Icons';
+import { useLanguage } from '@/hooks/useLanguage';
+import { useTypewriter } from '@/hooks/useTypewriter';
+import { TRANSLATIONS } from '@/config/i18n';
+import { useToast } from '@/components/Toast';
+
+interface SpeechRecognitionAlternativeLike {
+  transcript: string;
+}
+
+interface SpeechRecognitionResultLike {
+  0: SpeechRecognitionAlternativeLike;
+  isFinal: boolean;
+  length: number;
+}
+
+interface SpeechRecognitionEventLike {
+  results: ArrayLike<SpeechRecognitionResultLike>;
+}
+
+interface SpeechRecognitionLike {
+  lang: string;
+  interimResults: boolean;
+  continuous: boolean;
+  maxAlternatives: number;
+  onstart: (() => void) | null;
+  onerror: (() => void) | null;
+  onend: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+  start: () => void;
+  stop: () => void;
+}
+
+declare global {
+  interface Window {
+    webkitSpeechRecognition?: new () => SpeechRecognitionLike;
+    SpeechRecognition?: new () => SpeechRecognitionLike;
+  }
+}
 
 interface PromptInputProps {
   value: string;
@@ -8,200 +47,219 @@ interface PromptInputProps {
   onAnalyze: () => void;
   onClear: () => void;
   isAnalyzing: boolean;
-  isValid?: boolean;
 }
 
-const RISK_KEYWORDS = ['ignore', 'bypass', 'override', 'reveal', 'system prompt', 'previous instructions', 'admin', 'sudo', 'root'];
-
-export function PromptInput({ value, onChange, onAnalyze, onClear, isAnalyzing }: PromptInputProps) {
-  const [isFocused, setIsFocused] = useState(false);
+export function PromptInput({
+  value,
+  onChange,
+  onAnalyze,
+  onClear,
+  isAnalyzing,
+}: PromptInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
+  const { language, t } = useLanguage();
+  const { showToast } = useToast();
+  const [isListening, setIsListening] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
 
-  // Auto-resize logic
+  const hasText = value.trim().length > 0;
+  const isActive = hasText || isFocused;
+
+  const borderGradient = isAnalyzing
+    ? 'linear-gradient(90deg, #fb7185, #f97316, #facc15, #fb7185)'
+    : isActive
+      ? 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7, #ec4899, #22d3ee)'
+      : 'linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899, #3B82F6)';
+
+  const typewriterPhrases = useMemo(
+    () => TRANSLATIONS.typewriter.phrases[language],
+    [language]
+  );
+
+  const { displayText } = useTypewriter({
+    phrases: typewriterPhrases,
+    typeSpeed: 50,
+    deleteSpeed: 30,
+    pauseAfterType: 2000,
+    pauseBetweenPhrases: 500,
+    enabled: value === '',
+  });
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      if (value.trim()) {
+        onAnalyze();
+      }
+    }
+  };
+
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 400)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 300)}px`;
     }
   }, [value]);
 
-  // Client-side risk detection (Derived State)
-  const lowerValue = value.toLowerCase();
-  const hasRisk = RISK_KEYWORDS.some(keyword => lowerValue.includes(keyword));
+  useEffect(() => {
+    return () => {
+      recognitionRef.current?.stop();
+    };
+  }, []);
 
-  // Determine input state (derived from value length)
-  const inputState = useMemo<'idle' | 'typing' | 'ready'>(() => {
-    if (value.length === 0) return 'idle';
-    if (value.length >= 10) return 'ready';
-    return 'typing';
-  }, [value.length]);
+  const handleVoiceInput = () => {
+    const SpeechRecognitionAPI = window.SpeechRecognition ?? window.webkitSpeechRecognition;
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      onAnalyze();
+    if (!SpeechRecognitionAPI) {
+      showToast(t(TRANSLATIONS.input.voiceUnsupported));
+      return;
     }
-  };
 
-  const getBorderGradient = () => {
-    switch (inputState) {
-      case 'idle':
-        return 'linear-gradient(90deg, #60A5FA, #A78BFA, #F472B6, #60A5FA)';
-      case 'typing':
-        return 'linear-gradient(90deg, #8B5CF6, #A78BFA, #C084FC, #8B5CF6)';
-      case 'ready':
-        return 'linear-gradient(90deg, #10B981, #34D399, #6EE7B7, #10B981)';
-      default:
-        return 'none';
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      return;
     }
-  };
 
-  const getGlowColor = () => {
-    switch (inputState) {
-      case 'idle':
-        return 'bg-blue-400/20';
-      case 'typing':
-        return 'bg-purple-500/30';
-      case 'ready':
-        return 'bg-emerald-500/30';
-      default:
-        return 'bg-blue-400/20';
-    }
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = language === 'fr' ? 'fr-FR' : 'en-US';
+    recognition.interimResults = true;
+    recognition.continuous = false;
+    recognition.maxAlternatives = 1;
+
+    const initialValue = value;
+    recognition.onstart = () => setIsListening(true);
+    recognition.onerror = () => setIsListening(false);
+    recognition.onend = () => setIsListening(false);
+    recognition.onresult = (event: SpeechRecognitionEventLike) => {
+      const transcript = Array.from(event.results)
+        .map((result) => result[0]?.transcript ?? '')
+        .join(' ')
+        .trim();
+      onChange(`${initialValue}${initialValue ? ' ' : ''}${transcript}`.trim());
+    };
+
+    recognitionRef.current = recognition;
+    recognition.start();
   };
 
   return (
-    <section className="w-full relative py-8 px-4 overflow-hidden sm:overflow-visible">
+    <div className="w-full max-w-[900px] mx-auto px-3 sm:px-4 relative z-10">
+      {/* Outer glow halo */}
+      <div
+        className={`
+          absolute -inset-1 blur-2xl rounded-[32px] pointer-events-none transition-all duration-400 motion-reduce:transition-none
+          ${isAnalyzing ? 'opacity-65' : isActive ? 'opacity-55' : 'opacity-35'}
+        `}
+        style={{
+          background: isAnalyzing
+            ? 'linear-gradient(90deg, rgba(244,63,94,0.35), rgba(249,115,22,0.35), rgba(250,204,21,0.28), rgba(244,63,94,0.35))'
+            : isActive
+              ? 'linear-gradient(90deg, rgba(34,211,238,0.26), rgba(59,130,246,0.28), rgba(168,85,247,0.26), rgba(236,72,153,0.26))'
+              : 'linear-gradient(90deg, rgba(59,130,246,0.2), rgba(139,92,246,0.2), rgba(236,72,153,0.2))'
+        }}
+      />
 
-      <div className="w-full max-w-5xl mx-auto relative z-10">
-        {/* Hero Text */}
-        <div className="text-center mb-16 md:mb-20 animate-fade-in">
-          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 leading-tight tracking-tight drop-shadow-sm">
-            Analyze Your Prompts
-          </h1>
-          <p className="text-xl sm:text-2xl text-white/90 font-light">
-            Detect security risks and improve prompt quality instantly
-          </p>
-        </div>
+      {/* Animated gradient border container */}
+      <div className="relative group rounded-[28px] sm:rounded-[32px] p-[1px]">
+        {/* Border gradient overlay - animated */}
+        <div
+          className="absolute inset-0 rounded-[28px] sm:rounded-[32px] transition-opacity duration-300 motion-reduce:transition-none motion-reduce:animate-none"
+          style={{
+            background: borderGradient,
+            backgroundSize: '200% 100%',
+            animation: `border-flow ${isAnalyzing ? '2.4s' : isActive ? '4s' : '6s'} linear infinite`,
+            opacity: isAnalyzing ? 1 : isActive ? 0.95 : 0.8
+          }}
+        />
 
-        <div className="relative group w-full mx-auto" style={{ maxWidth: '900px' }}>
-          {/* Outer ambient glow */}
-          <div className="absolute -inset-4 bg-white/10 blur-3xl rounded-[36px]" />
+        {/* Main input container - STRICT DARK BACKGROUND */}
+        <div className="relative bg-[#1f1f1f] rounded-[27px] sm:rounded-[31px] shadow-2xl flex flex-col min-h-[140px] sm:min-h-[160px]">
 
-          {/* Animated border layer */}
-          <div
-            className="absolute -inset-[3px] rounded-[32px] opacity-70 transition-opacity duration-500 animate-border-flow bg-[length:200%_100%]"
-            style={{ backgroundImage: getBorderGradient() }}
-          />
-
-          {/* Pulsing glow */}
-          <div
-            className={`absolute -inset-6 rounded-[36px] blur-3xl transition-all duration-500 animate-pulse-glow ${getGlowColor()} ${isFocused ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-              }`}
-          />
-
-          {/* Warning Glow override if risk detected */}
-          {hasRisk && (
-            <div className="absolute -inset-6 rounded-[36px] blur-3xl bg-red-500/30 animate-pulse transition-opacity duration-300 pointer-events-none" />
-          )}
-
-          {/* Main input container - LARGE */}
-          <div
-            className={`
-              relative bg-slate-900/60 backdrop-blur-xl border-2 rounded-[28px] shadow-2xl hover:shadow-3xl transition-all duration-300
-              ${hasRisk ? 'border-red-400' : 'border-white/15'}
-            `}
-          >
-            {/* Risk Warning Badge */}
-            {hasRisk && (
-              <div className="absolute -top-3 left-6 px-3 py-1 bg-red-500/20 border border-red-400/30 text-red-300 text-xs font-semibold rounded-full shadow-sm flex items-center gap-1.5 animate-fade-in z-10 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+          {/* Textarea Area */}
+          <div className="flex-1 w-full pt-4 sm:pt-6 px-4 sm:px-6 relative">
+            {/* Typewriter placeholder overlay */}
+            {value === '' && (
+              <div className="absolute inset-0 pt-4 sm:pt-6 px-4 sm:px-6 pointer-events-none">
+                <span className="text-gray-500 text-base sm:text-xl leading-relaxed cursor-blink">
+                  {displayText}
                 </span>
-                Risk pattern detected
               </div>
             )}
+            <textarea
+              ref={textareaRef}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+              onFocus={() => setIsFocused(true)}
+              onBlur={() => setIsFocused(false)}
+              onKeyDown={handleKeyDown}
+              className="w-full bg-transparent text-white placeholder-transparent focus:outline-none focus:ring-0 text-base sm:text-xl leading-relaxed resize-none scrollbar-hide border-none relative z-10"
+              placeholder=""
+              rows={1}
+              style={{ minHeight: '60px' }}
+            />
+          </div>
 
-            <div className="flex items-start gap-4 p-6">
-              {/* Auto-expanding textarea */}
-              <div className="flex-1 relative">
-                <textarea
-                  ref={textareaRef}
-                  value={value}
-                  onChange={(e) => onChange(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => setIsFocused(true)}
-                  onBlur={() => setIsFocused(false)}
-                  className={`
-                   w-full min-h-[80px] max-h-[400px] resize-none bg-transparent
-                   text-slate-100 placeholder-slate-400 focus:outline-none
-                   text-lg leading-relaxed pt-1
-                   ${isAnalyzing ? 'opacity-50 cursor-not-allowed' : ''}
-                 `}
-                  style={{ fontFamily: 'system-ui, -apple-system, sans-serif' }}
-                  placeholder="Enter your prompt to analyze..."
-                  rows={1}
-                  disabled={isAnalyzing}
-                  spellCheck={false}
-                />
-                {/* Blinking cursor animation when empty */}
-                {!value && isFocused && (
-                  <div className="absolute top-3 left-0 pointer-events-none text-blue-400 font-light text-xl animate-pulse">|</div>
-                )}
-              </div>
+          {/* Bottom Toolbar */}
+          <div className="flex items-center justify-between px-4 sm:px-5 pb-4 sm:pb-5 mt-auto">
+            {/* Left: Clear */}
+            <button
+              onClick={onClear}
+              disabled={!value.trim()}
+              className={`
+                p-2.5 sm:p-3 rounded-full transition-colors
+                ${value.trim()
+                  ? 'text-gray-400 hover:text-white hover:bg-white/5'
+                  : 'text-gray-600 cursor-not-allowed'
+                }
+              `}
+              title={t(TRANSLATIONS.input.clear)}
+              type="button"
+            >
+              <XIcon className="w-5 h-5" />
+            </button>
 
-              {/* Action buttons */}
-              <div className={`flex flex-col items-center gap-2 pt-1 transition-opacity duration-200 ${isAnalyzing ? 'opacity-50' : 'opacity-100'}`}>
-                <button
-                  onClick={onClear}
-                  disabled={!value.trim() || isAnalyzing}
-                  className="p-2 text-slate-400 hover:text-slate-200 hover:bg-white/10 rounded-lg transition-all disabled:opacity-30"
-                  title="Clear"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-
-                <button
-                  onClick={onAnalyze}
-                  disabled={!value.trim() || isAnalyzing}
-                  className={`
-                  px-8 py-4 bg-blue-500 hover:bg-blue-600 text-white font-semibold text-base rounded-2xl
-                  transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg shadow-blue-500/30
-                  disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 disabled:shadow-none
-                  flex items-center gap-2
+            {/* Right: Actions Group */}
+            <div className="flex items-center gap-3">
+              {/* Signal Icon */}
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`
+                  p-2.5 sm:p-3 rounded-full transition-colors
+                  ${isListening
+                    ? 'text-emerald-300 bg-emerald-500/10'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                  }
                 `}
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                      </svg>
-                      <span>Running...</span>
-                    </>
-                  ) : (
-                    <span>Analyze</span>
-                  )}
-                </button>
-              </div>
-            </div>
+                title={isListening ? t(TRANSLATIONS.input.voiceStop) : t(TRANSLATIONS.input.voiceStart)}
+              >
+                <SignalIcon className="w-6 h-6" />
+              </button>
 
-            {/* Bottom status bar */}
-            {value.length > 0 && (
-              <div className="px-6 pb-4 flex items-center justify-between text-xs text-slate-400 border-t border-white/10 pt-3 mx-3">
-                <span>{value.length} / 5000 chars</span>
-                <span className="hidden sm:flex items-center gap-1.5 opacity-70">
-                  <kbd className="px-1.5 py-0.5 bg-white/10 border border-white/15 rounded text-[10px] font-sans text-slate-400">⌘</kbd>
-                  <kbd className="px-1.5 py-0.5 bg-white/10 border border-white/15 rounded text-[10px] font-sans text-slate-400">Enter</kbd>
-                  <span>to run</span>
-                </span>
-              </div>
-            )}
+              {/* Submit Button (Arrow Up in Circle) */}
+              <button
+                onClick={() => value.trim() && onAnalyze()}
+                disabled={!value.trim() || isAnalyzing}
+                className={`
+                  p-2.5 sm:p-3 rounded-full transition-all duration-300 motion-reduce:transition-none
+                  ${value.trim() && !isAnalyzing
+                    ? 'bg-white text-black hover:bg-gray-200 cursor-pointer shadow-lg'
+                    : 'bg-white/10 text-gray-500 cursor-not-allowed'
+                  }
+                `}
+                title={t(TRANSLATIONS.input.analyze)}
+              >
+                {isAnalyzing ? (
+                  <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <ArrowUpIcon className="w-5 h-5" />
+                )}
+              </button>
+            </div>
           </div>
         </div>
-      </div> {/* Closing content wrapper */}
-    </section>
+      </div>
+    </div>
   );
 }

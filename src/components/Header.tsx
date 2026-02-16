@@ -1,67 +1,108 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 
+function MenuIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+    </svg>
+  );
+}
+
+function CloseIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
+
+function LogoMark() {
+  return (
+    <div className="w-11 h-11 rounded-xl bg-black border border-white/15 flex items-center justify-center shadow-[0_10px_24px_rgba(0,0,0,0.38)]">
+      <Image src="/cube-scan.svg" alt="ScanMyPrompt logo" width={24} height={24} />
+    </div>
+  );
+}
+
 export function Header() {
   const { language, toggleLanguage, t } = useLanguage();
-  const [isScrolled, setIsScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  const navLinks = [
+    { href: '/about', label: TRANSLATIONS.header.aboutLink },
+  ];
 
   return (
-    <header className="sticky top-4 z-50 mx-auto max-w-4xl px-4 transition-all duration-300">
-      <div
-        className={`
-          bg-white/95 backdrop-blur-md border border-gray-200/50 rounded-full shadow-sm px-6 py-3
-          transition-all duration-300 ease-out
-          ${isScrolled ? 'scale-[0.98] shadow-md' : 'scale-100'}
-        `}
-      >
-        <nav className="flex items-center justify-between">
-          {/* Left: Logo */}
-          <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <svg className="w-5 h-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <span className="font-semibold text-gray-900 tracking-tight">ScanMyPrompt</span>
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-[#060608]/82 backdrop-blur-xl supports-[backdrop-filter]:bg-[#060608]/70">
+      <nav className="max-w-7xl mx-auto px-4 py-3">
+        <div className="flex items-center justify-between">
+          {/* Brand */}
+          <Link
+            href="/"
+            className="flex items-center gap-3 group"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            <LogoMark />
+            <p className="font-semibold text-white/95 tracking-tight text-[15px] leading-none">ScanMyPrompt</p>
+          </Link>
+
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center gap-1 p-1 rounded-xl border border-white/10 bg-white/[0.02]">
+            {navLinks.map((link) =>
+              <Link
+                key={link.href}
+                href={link.href}
+                className="px-3 py-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/[0.06] rounded-lg transition-colors"
+              >
+                {t(link.label)}
+              </Link>
+            )}
           </div>
 
-          {/* Right: Language + CTA */}
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Actions */}
+          <div className="flex items-center gap-3">
             <button
+              type="button"
               onClick={toggleLanguage}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-full transition-colors flex items-center gap-2"
+              className="px-3 py-1.5 text-xs font-semibold text-slate-300 hover:text-white border border-white/10 hover:border-white/20 rounded-lg transition-all uppercase tracking-wide bg-white/[0.03]"
             >
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span className="uppercase">{language}</span>
+              {language}
             </button>
 
-            <Link
-              href="/about"
-              className="hidden sm:block text-sm text-gray-600 hover:text-gray-900 transition-colors"
+            {/* Mobile menu button */}
+            <button
+              type="button"
+              className="md:hidden p-2 text-slate-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              onClick={() => setMobileMenuOpen((v) => !v)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
             >
-              {t(TRANSLATIONS.header.aboutLink)}
-            </Link>
-
-            <button className="hidden sm:block px-5 py-2 bg-gray-900 text-white text-sm font-medium rounded-full hover:bg-gray-800 transition-transform active:scale-95 shadow-lg shadow-gray-900/10">
-              Get Started
+              {mobileMenuOpen ? <CloseIcon className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
             </button>
           </div>
-        </nav>
-      </div>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden mt-4 pt-4 border-t border-white/10 space-y-2 animate-slide-down">
+            {navLinks.map((link) =>
+              <Link
+                key={link.href}
+                href={link.href}
+                className="block py-3 px-4 text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white rounded-xl transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                {t(link.label)}
+              </Link>
+            )}
+          </div>
+        )}
+      </nav>
     </header>
   );
 }
