@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { SparklesIcon } from '@/components/ui/Icons';
@@ -14,6 +15,7 @@ interface AIInsightsProps {
   onToggleDetails?: () => void;
   showDetails?: boolean;
   detailsPanelId?: string;
+  showUnavailable?: boolean;
 }
 
 function MarkdownRenderer({ text }: { text: string }) {
@@ -53,8 +55,11 @@ function MarkdownRenderer({ text }: { text: string }) {
 
     // Heading
     if (line.startsWith('### ')) {
+      if (elements.length > 0) {
+        elements.push(<div key={`sep-${i}`} className="my-3 border-t border-white/10" />);
+      }
       elements.push(
-        <h4 key={i} className="text-sm font-bold text-white mt-4 mb-2">
+        <h4 key={i} className="text-sm font-bold text-white mt-3 mb-2">
           {line.slice(4)}
         </h4>
       );
@@ -73,9 +78,9 @@ function MarkdownRenderer({ text }: { text: string }) {
     if (line.startsWith('- ') || line.startsWith('* ')) {
       const content = line.slice(2);
       elements.push(
-        <div key={i} className="flex gap-2 ml-1 my-1">
+        <div key={i} className="flex gap-2 ml-1 my-1.5">
           <span className="text-blue-400 mt-0.5 flex-shrink-0">-</span>
-          <span className="text-sm text-gray-300 leading-relaxed">
+          <span className="text-[15px] text-gray-300 leading-7">
             {renderInline(content)}
           </span>
         </div>
@@ -85,7 +90,7 @@ function MarkdownRenderer({ text }: { text: string }) {
 
     // Regular paragraph
     elements.push(
-      <p key={i} className="text-sm text-gray-300 leading-relaxed my-1">
+      <p key={i} className="text-[15px] text-gray-300 leading-7 my-1.5">
         {renderInline(line)}
       </p>
     );
@@ -161,17 +166,21 @@ export function AIInsights({
   onToggleDetails,
   showDetails = false,
   detailsPanelId,
+  showUnavailable = false,
 }: AIInsightsProps) {
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const [copiedInsights, setCopiedInsights] = useState(false);
 
-  if (!isLoading && !insights) return null;
+  if (!isLoading && !insights && !showUnavailable) return null;
   const safeInsights = insights ? sanitizeAiInsightsText(insights) : '';
 
   const handleCopyInsights = async () => {
     if (!safeInsights) return;
     const copied = await copyTextToClipboard(safeInsights);
     if (copied) {
+      setCopiedInsights(true);
+      setTimeout(() => setCopiedInsights(false), 1500);
       showToast(t(TRANSLATIONS.security.copied));
     }
   };
@@ -181,9 +190,9 @@ export function AIInsights({
       {/* Top accent bar */}
       <div className="h-1 bg-gradient-to-r from-blue-400 via-violet-400 to-pink-400" />
 
-      <div className="p-6 sm:p-8">
+      <div className="p-5 sm:p-7">
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-gradient-to-br from-blue-900/30 to-violet-900/30 rounded-lg">
               <SparklesIcon className="w-5 h-5 text-violet-400" />
@@ -199,7 +208,7 @@ export function AIInsights({
                 onClick={handleCopyInsights}
                 className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
               >
-                {t(TRANSLATIONS.ai.copyAnalysis)}
+                {copiedInsights ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.ai.copyAnalysis)}
               </button>
             )}
             {onCopyImproved && (
@@ -231,6 +240,11 @@ export function AIInsights({
         ) : safeInsights ? (
           <div className="animate-fade-in">
             <MarkdownRenderer text={safeInsights} />
+          </div>
+        ) : showUnavailable ? (
+          <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
+            <p className="text-sm font-medium text-amber-200">{t(TRANSLATIONS.ai.error)}</p>
+            <p className="mt-1 text-xs text-amber-100/80">{t(TRANSLATIONS.ai.fallback)}</p>
           </div>
         ) : null}
       </div>

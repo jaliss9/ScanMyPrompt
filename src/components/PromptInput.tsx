@@ -93,7 +93,7 @@ export function PromptInput({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      if (value.trim()) {
+      if (value.trim() && !isVisualLoading) {
         onAnalyze();
       }
     }
@@ -246,12 +246,12 @@ export function PromptInput({
 
               {/* Submit Button (Arrow Up in Circle) */}
               <button
-                onClick={() => value.trim() && onAnalyze()}
-                disabled={!value.trim() || isAnalyzing}
+                onClick={() => value.trim() && !isVisualLoading && onAnalyze()}
+                disabled={!value.trim() || isVisualLoading}
                 className={`
-                  p-2.5 sm:p-3 rounded-full transition-all duration-300 motion-reduce:transition-none
-                  ${value.trim() && !isAnalyzing
-                    ? 'bg-white text-black hover:bg-gray-200 cursor-pointer shadow-lg'
+                  p-3 sm:p-3.5 rounded-full transition-all duration-300 motion-reduce:transition-none
+                  ${value.trim() && !isVisualLoading
+                    ? 'bg-white text-black hover:bg-gray-200 cursor-pointer shadow-lg hover:scale-105'
                     : 'bg-white/10 text-gray-500 cursor-not-allowed'
                   }
                 `}
@@ -259,10 +259,10 @@ export function PromptInput({
                 aria-label={t(TRANSLATIONS.input.analyze)}
                 type="button"
               >
-                {isAnalyzing ? (
-                  <div className="w-5 h-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
+                {isVisualLoading ? (
+                  <div className="w-6 h-6 border-2 border-gray-500 border-t-transparent rounded-full animate-spin" />
                 ) : (
-                  <ArrowUpIcon className="w-5 h-5" />
+                  <ArrowUpIcon className="w-6 h-6" />
                 )}
               </button>
             </div>

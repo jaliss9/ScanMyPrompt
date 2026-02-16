@@ -64,7 +64,10 @@ export default function Home() {
     if (ts && ts !== prevTimestampRef.current) {
       prevTimestampRef.current = ts;
       setTimeout(() => {
-        document.getElementById('verdict')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        const verdict = document.getElementById('verdict');
+        if (!verdict) return;
+        const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        verdict.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
       }, 100);
     }
   }, [result?.timestamp]);
@@ -137,7 +140,7 @@ export default function Home() {
           <div className="w-full max-w-5xl relative z-10">
             {/* Hero text — collapses when results are shown */}
             {!result && (
-              <div className="text-center mb-16 animate-fade-in">
+              <div className="text-center mb-10 sm:mb-16 animate-fade-in">
                 <h1 className="text-4xl sm:text-5xl md:text-7xl font-bold text-white mb-4 sm:mb-6 tracking-tight drop-shadow-sm">
                   {t(TRANSLATIONS.hero.title)}
                 </h1>
@@ -159,7 +162,7 @@ export default function Home() {
 
             {/* Results — directly under prompt */}
             {result && (
-              <div className="mt-12 space-y-8 animate-fade-in max-w-6xl mx-auto">
+              <div className="mt-8 sm:mt-12 space-y-8 animate-fade-in max-w-6xl mx-auto">
                 <PatternCounter issuesFound={result.security.detections.length} />
 
                 <Verdict
@@ -177,6 +180,7 @@ export default function Home() {
                   onToggleDetails={() => setShowDetails((v) => !v)}
                   showDetails={showDetails}
                   detailsPanelId="analysis-details"
+                  showUnavailable={!!result && !isAiLoading && !aiInsights}
                 />
 
                 {/* Details panel — hidden by default */}

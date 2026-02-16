@@ -34,20 +34,24 @@ export function useAnalysis() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
   const finalizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const analyzeLockRef = useRef(false);
   const mountedRef = useRef(true);
 
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
+      analyzeLockRef.current = false;
       if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
       if (abortRef.current) abortRef.current.abort();
     };
   }, []);
 
   const analyze = useCallback((text?: string, language?: string) => {
+    if (analyzeLockRef.current) return;
     const input = text ?? prompt;
     if (!input.trim()) return;
+    analyzeLockRef.current = true;
 
     // Reset AI state
     setAiInsights(null);
@@ -65,6 +69,7 @@ export function useAnalysis() {
       if (!mountedRef.current) return;
       setResult(analysisResult);
       setIsAnalyzing(false);
+      analyzeLockRef.current = false;
 
       // Fire AI fetch (non-blocking, after heuristic results shown)
       setIsAiLoading(true);
@@ -88,6 +93,7 @@ export function useAnalysis() {
     setResult(null);
     setAiInsights(null);
     setIsAiLoading(false);
+    analyzeLockRef.current = false;
     if (finalizeTimerRef.current) clearTimeout(finalizeTimerRef.current);
     if (abortRef.current) abortRef.current.abort();
   }, []);

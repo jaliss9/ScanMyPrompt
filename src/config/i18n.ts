@@ -501,6 +501,10 @@ export const TRANSLATIONS = {
       en: 'AI analysis unavailable',
       fr: 'Analyse IA indisponible',
     },
+    fallback: {
+      en: 'Showing heuristic results only. You can still use risk, quality, and rewrite outputs.',
+      fr: 'Affichage des résultats heuristiques uniquement. Vous pouvez toujours utiliser le risque, la qualité et les réécritures.',
+    },
   },
   typewriter: {
     phrases: {

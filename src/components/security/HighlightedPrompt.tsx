@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -33,12 +34,15 @@ const CATEGORY_DOT_COLORS: Record<SecurityCategory, string> = {
 export function HighlightedPrompt({ prompt, ranges }: HighlightedPromptProps) {
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const [copiedPrompt, setCopiedPrompt] = useState(false);
 
   if (ranges.length === 0) return null;
 
   const handleCopyPrompt = async () => {
     const copied = await copyTextToClipboard(prompt);
     if (copied) {
+      setCopiedPrompt(true);
+      setTimeout(() => setCopiedPrompt(false), 1500);
       showToast(t(TRANSLATIONS.security.copied));
     }
   };
@@ -79,7 +83,7 @@ export function HighlightedPrompt({ prompt, ranges }: HighlightedPromptProps) {
           onClick={handleCopyPrompt}
           className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
         >
-          {t(TRANSLATIONS.security.copyPrompt)}
+          {copiedPrompt ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.security.copyPrompt)}
         </button>
       </div>
 

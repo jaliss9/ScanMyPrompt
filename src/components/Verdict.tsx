@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { useToast } from '@/components/Toast';
@@ -17,6 +18,7 @@ interface VerdictProps {
 export function Verdict({ result, showDetails, onToggleDetails, detailsPanelId }: VerdictProps) {
   const { t } = useLanguage();
   const { showToast } = useToast();
+  const [copiedImproved, setCopiedImproved] = useState(false);
 
   const isRisky = result.security.riskScore >= 3;
   const verdictMessage = isRisky
@@ -29,6 +31,8 @@ export function Verdict({ result, showDetails, onToggleDetails, detailsPanelId }
   const handleCopyImproved = async () => {
     const copied = await copyTextToClipboard(result.quality.improvedVersion);
     if (copied) {
+      setCopiedImproved(true);
+      setTimeout(() => setCopiedImproved(false), 1500);
       showToast(t(TRANSLATIONS.security.copied));
     }
   };
@@ -65,7 +69,7 @@ export function Verdict({ result, showDetails, onToggleDetails, detailsPanelId }
               onClick={handleCopyImproved}
               className="px-3 py-1.5 rounded-lg bg-cyan-500/10 border border-cyan-500/25 text-xs font-medium text-cyan-300 hover:bg-cyan-500/20 transition-colors"
             >
-              {t(TRANSLATIONS.quality.copyImproved)}
+              {copiedImproved ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.quality.copyImproved)}
             </button>
           )}
         </div>
