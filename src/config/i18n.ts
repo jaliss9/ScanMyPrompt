@@ -530,6 +530,7 @@ export const TRANSLATIONS = {
       fr: 'ScanMyPrompt combine la correspondance de motifs heuristiques avec une analyse propulsée par IA (Llama 3 via Groq) pour détecter les risques de sécurité et améliorer la qualité des prompts. Il ne remplace pas un test de sécurité complet.',
     },
     builtBy: { en: 'J-2026', fr: 'J-2026' },
+    privacyPolicy: { en: 'Privacy Policy', fr: 'Politique de confidentialité' },
   },
   meta: {
     title: { en: 'ScanMyPrompt — AI Prompt Security & Quality Analyzer', fr: 'ScanMyPrompt — Analyseur de Sécurité & Qualité de Prompts IA' },
