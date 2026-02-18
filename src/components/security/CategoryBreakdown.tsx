@@ -52,7 +52,15 @@ export function CategoryBreakdown({ categories }: CategoryBreakdownProps) {
             <div key={cat.category} className="group transition-colors hover:bg-white/[0.02]">
               <div
                 className={`grid grid-cols-12 gap-4 px-4 py-3 items-center ${hasDetections ? 'cursor-pointer' : 'opacity-50'}`}
+                role={hasDetections ? 'button' : undefined}
+                tabIndex={hasDetections ? 0 : -1}
                 onClick={() => hasDetections && setExpanded(isExpanded ? null : cat.category)}
+                onKeyDown={(e) => {
+                  if (hasDetections && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    setExpanded(isExpanded ? null : cat.category);
+                  }
+                }}
               >
                 {/* Category Name & Icon */}
                 <div className="col-span-5 flex items-center gap-3">

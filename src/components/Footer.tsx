@@ -15,12 +15,18 @@ export function Footer() {
         </p>
         <p className="text-sm text-gray-500">{t(TRANSLATIONS.footer.builtBy)}</p>
         <p className="mt-2 text-[11px] text-gray-600">{t(TRANSLATIONS.ai.poweredBy)}</p>
-        <div className="mt-4">
+        <div className="mt-4 flex items-center justify-center gap-4">
           <Link
-            href="/privacy"
+            href="/terms"
             className="text-xs text-gray-500 hover:text-gray-300 transition-colors underline underline-offset-4"
           >
-            {t(TRANSLATIONS.footer.privacyPolicy)}
+            {t(TRANSLATIONS.footer.terms)}
+          </Link>
+          <Link
+            href="/contact"
+            className="text-xs text-gray-500 hover:text-gray-300 transition-colors underline underline-offset-4"
+          >
+            {t(TRANSLATIONS.footer.contact)}
           </Link>
         </div>
       </div>

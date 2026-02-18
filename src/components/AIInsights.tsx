@@ -13,6 +13,7 @@ interface AIInsightsProps {
   isLoading: boolean;
   onCopyImproved?: () => void;
   onToggleDetails?: () => void;
+  onRetry?: () => void;
   showDetails?: boolean;
   detailsPanelId?: string;
   showUnavailable?: boolean;
@@ -164,6 +165,7 @@ export function AIInsights({
   isLoading,
   onCopyImproved,
   onToggleDetails,
+  onRetry,
   showDetails = false,
   detailsPanelId,
   showUnavailable = false,
@@ -245,6 +247,15 @@ export function AIInsights({
           <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4">
             <p className="text-sm font-medium text-amber-200">{t(TRANSLATIONS.ai.error)}</p>
             <p className="mt-1 text-xs text-amber-100/80">{t(TRANSLATIONS.ai.fallback)}</p>
+            {onRetry && (
+              <button
+                type="button"
+                onClick={onRetry}
+                className="mt-3 px-3 py-1.5 text-xs font-medium text-amber-200 border border-amber-500/30 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+              >
+                {t(TRANSLATIONS.ai.retry)}
+              </button>
+            )}
           </div>
         ) : null}
       </div>

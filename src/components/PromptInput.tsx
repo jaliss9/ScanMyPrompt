@@ -156,7 +156,7 @@ export function PromptInput({
           ${isVisualLoading ? 'opacity-65' : isActive ? 'opacity-55' : 'opacity-35'}
         `}
         style={{
-          background: isVisualLoading
+          backgroundImage: isVisualLoading
             ? 'linear-gradient(90deg, rgba(244,63,94,0.35), rgba(249,115,22,0.35), rgba(250,204,21,0.28), rgba(244,63,94,0.35))'
             : isActive
               ? 'linear-gradient(90deg, rgba(34,211,238,0.26), rgba(59,130,246,0.28), rgba(168,85,247,0.26), rgba(236,72,153,0.26))'
@@ -168,10 +168,9 @@ export function PromptInput({
       <div className="relative group rounded-[28px] sm:rounded-[32px] p-[1px]">
         {/* Border gradient overlay - animated */}
         <div
-          className="absolute inset-0 rounded-[28px] sm:rounded-[32px] transition-opacity duration-300 motion-reduce:transition-none motion-reduce:animate-none"
+          className="absolute inset-0 rounded-[28px] sm:rounded-[32px] bg-[length:200%_100%] bg-no-repeat transition-opacity duration-300 motion-reduce:transition-none motion-reduce:animate-none"
           style={{
-            background: borderGradient,
-            backgroundSize: '200% 100%',
+            backgroundImage: borderGradient,
             animation: `border-flow ${isVisualLoading ? '2.4s' : isActive ? '4s' : '6s'} linear infinite`,
             opacity: isVisualLoading ? 1 : isActive ? 0.95 : 0.8
           }}

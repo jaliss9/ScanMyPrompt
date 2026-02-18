@@ -25,6 +25,12 @@ export const TRANSLATIONS = {
     learnLink: { en: 'Learn', fr: 'Apprendre' },
     aboutLink: { en: 'About', fr: 'À propos' },
     tryFree: { en: 'Try Free', fr: 'Essayer gratuit' },
+    openMenu: { en: 'Open menu', fr: 'Ouvrir le menu' },
+    closeMenu: { en: 'Close menu', fr: 'Fermer le menu' },
+  },
+  mode: {
+    compact: { en: 'Compact mode', fr: 'Mode épuré' },
+    full: { en: 'Full mode', fr: 'Mode complet' },
   },
   input: {
     placeholder: {
@@ -505,6 +511,10 @@ export const TRANSLATIONS = {
       en: 'Showing heuristic results only. You can still use risk, quality, and rewrite outputs.',
       fr: 'Affichage des résultats heuristiques uniquement. Vous pouvez toujours utiliser le risque, la qualité et les réécritures.',
     },
+    retry: {
+      en: 'Retry AI analysis',
+      fr: 'Relancer l\'analyse IA',
+    },
   },
   typewriter: {
     phrases: {
@@ -530,7 +540,8 @@ export const TRANSLATIONS = {
       fr: 'ScanMyPrompt combine la correspondance de motifs heuristiques avec une analyse propulsée par IA (Llama 3 via Groq) pour détecter les risques de sécurité et améliorer la qualité des prompts. Il ne remplace pas un test de sécurité complet.',
     },
     builtBy: { en: 'J-2026', fr: 'J-2026' },
-    privacyPolicy: { en: 'Privacy Policy', fr: 'Politique de confidentialité' },
+    terms: { en: 'Terms', fr: 'Conditions' },
+    contact: { en: 'Contact', fr: 'Contact' },
   },
   meta: {
     title: { en: 'ScanMyPrompt — AI Prompt Security & Quality Analyzer', fr: 'ScanMyPrompt — Analyseur de Sécurité & Qualité de Prompts IA' },

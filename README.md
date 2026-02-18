@@ -1,49 +1,43 @@
 # ScanMyPrompt
 
-AI Prompt Security & Quality Analyzer. Analyze your LLM prompts for security vulnerabilities (prompt injection, jailbreak, data exfiltration) and quality improvements (context, specificity, structure, constraints, clarity, examples).
+AI Prompt Security & Quality Analyzer — free, private, runs in your browser.
 
-## Features
+![ScanMyPrompt Demo](./public/demo.gif)
 
-- **Security Analysis**: Detects 6 categories of prompt injection attacks across 58 regex patterns
-  - System Prompt Override
-  - Jailbreak
-  - Data Exfiltration
-  - Tool/Agent Abuse
-  - Encoding & Obfuscation
-  - Social Engineering
-- **Quality Analysis**: Scores prompts across 6 dimensions
-  - Context, Specificity, Structure, Constraints, Clarity, Examples
-- **Visual Gauges**: Risk score (1-5) and Quality score (1-5) with animated SVG gauges
-- **Highlighted Prompt**: Color-coded danger zones in the original prompt
-- **Safe Rewrite**: Sanitized version with malicious content removed
-- **Quality Radar Chart**: SVG radar chart showing 6 quality dimensions
-- **Improvement Suggestions**: Actionable tips with concrete examples
-- **Auto-Improved Prompt**: Rules-based rewriting that adds missing elements
-- **20 Example Prompts**: Pre-loaded examples for testing (security + quality + mixed)
-- **Education Section**: 12 expandable cards covering attack types and best practices
-- **Bilingual**: Full EN/FR toggle affecting all UI and analysis output
-- **Client-Side**: All analysis runs in the browser, no data sent to servers
-- **Export**: Download analysis as Markdown report
-- **Share**: Generate shareable URL with encoded prompt
-- **BYOK**: Optional API key integration for LLM-enhanced analysis (OpenAI/Anthropic)
-- **Dark Theme**: Glassmorphism design with animated background blobs
+[Live Demo](https://scan-my-prompt.vercel.app) | EN/FR
+
+## What it does
+
+- **Security analysis** — 58 regex patterns across 6 OWASP LLM Top 10 categories
+- **Quality scoring** — 6 dimensions (context, specificity, structure, constraints, clarity, examples)
+- **AI insights** — powered by Llama 3 via Groq (optional, server-side key)
+- **Safe rewrite** — automatic sanitization of detected threats
+- **Export report** — download a Markdown report for documentation
+
+## Privacy
+
+All heuristic analysis runs 100% in your browser. No data is sent to any server.
+The optional AI insights feature sends the prompt to Groq's API via a server-side proxy.
 
 ## Tech Stack
 
-- **Framework**: Next.js 16 (App Router)
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS v4
-- **Deployment**: Vercel (free tier)
-- **Engine**: Heuristic pattern matching (regex + structural analysis), fully client-side
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4
 
 ## Getting Started
 
 ```bash
 npm install
+cp .env.example .env.local  # Add your GROQ_API_KEY (optional)
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `GROQ_API_KEY` | No | Groq API key for AI insights. Get one free at [console.groq.com](https://console.groq.com) |
 
 ## Build
 
@@ -51,24 +45,6 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 npm run build
 ```
 
-## Deploy
+## License
 
-Deploy to Vercel with one click or use the CLI:
-
-```bash
-npx vercel
-```
-
-## Architecture
-
-```
-src/
-  app/          - Next.js App Router pages and API routes
-  components/   - React components (security/, quality/, ui/)
-  engine/       - Analysis engines (security/, quality/)
-  config/       - i18n translations and example prompts
-  types/        - TypeScript interfaces
-  hooks/        - React hooks (useLanguage, useAnalysis)
-```
-
-## Built by Jal
+MIT
