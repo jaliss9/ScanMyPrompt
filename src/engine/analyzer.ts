@@ -3,7 +3,6 @@ import { SECURITY_PATTERNS } from './security/patterns';
 import { classifyDetections } from './security/classifier';
 import { calculateRiskScore, RISK_LABELS } from './security/scorer';
 import { generateHighlightRanges } from './security/highlighter';
-import { generateSafeVersion } from './security/sanitizer';
 import { analyzeAllDimensions } from './quality/dimensions';
 import { calculateQualityScore, QUALITY_LABELS } from './quality/scorer';
 import { generateSuggestions } from './quality/suggestions';
@@ -62,7 +61,6 @@ export function analyzePrompt(prompt: string): AnalysisResult {
   const categories = classifyDetections(detections);
   const riskScore = calculateRiskScore(detections);
   const highlightRanges = generateHighlightRanges(detections);
-  const safeVersion = generateSafeVersion(prompt, detections);
 
   // Quality analysis
   const dimensions = analyzeAllDimensions(prompt);
@@ -78,7 +76,6 @@ export function analyzePrompt(prompt: string): AnalysisResult {
       categories,
       detections,
       highlightRanges,
-      safeVersion,
     },
     quality: {
       qualityScore,

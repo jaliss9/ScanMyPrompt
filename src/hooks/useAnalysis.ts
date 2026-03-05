@@ -16,7 +16,7 @@ async function fetchAiInsights(
   try {
     const res = await fetch('/api/ai-insights', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'ScanMyPrompt' },
       body: JSON.stringify({ prompt, language, riskScore, qualityScore }),
       signal,
     });

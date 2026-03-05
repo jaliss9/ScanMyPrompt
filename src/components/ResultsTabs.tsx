@@ -6,7 +6,6 @@ import { TRANSLATIONS } from '@/config/i18n';
 import { TabBar } from '@/components/ui/TabBar';
 import { CategoryBreakdown } from '@/components/security/CategoryBreakdown';
 import { HighlightedPrompt } from '@/components/security/HighlightedPrompt';
-import { SafeRewrite } from '@/components/security/SafeRewrite';
 import { QualityRadar } from '@/components/quality/QualityRadar';
 import { Suggestions } from '@/components/quality/Suggestions';
 import type { AnalysisResult } from '@/types';
@@ -19,12 +18,6 @@ function SecurityContent({ result }: { result: AnalysisResult }) {
         prompt={result.prompt}
         ranges={result.security.highlightRanges}
       />
-      {result.security.detections.length > 0 && (
-        <SafeRewrite
-          original={result.prompt}
-          sanitized={result.security.safeVersion}
-        />
-      )}
     </div>
   );
 }

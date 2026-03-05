@@ -59,7 +59,6 @@ export interface SecurityResult {
   categories: CategoryScore[];
   detections: Detection[];
   highlightRanges: HighlightRange[];
-  safeVersion: string;
 }
 
 export interface QualityResult {

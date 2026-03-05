@@ -28,7 +28,11 @@ export function extractImprovedPromptFromInsights(insights: string): string | nu
     collected.push(line);
   }
 
-  const extracted = collected.join('\n').trim();
+  let extracted = collected.join('\n').trim();
+  // Strip wrapping code fences (```...```) that the LLM sometimes adds
+  if (extracted.startsWith('```')) {
+    extracted = extracted.replace(/^```[\w]*\n?/, '').replace(/\n?```$/, '').trim();
+  }
   return extracted.length > 0 ? extracted : null;
 }
 

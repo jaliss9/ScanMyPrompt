@@ -21,12 +21,25 @@ import { generateMarkdownReport, downloadMarkdown } from '@/utils/exportMarkdown
 const loadExampleLibrary = () => import('@/components/ExampleLibrary');
 const loadEducationSection = () => import('@/components/EducationSection');
 
+const SectionSkeleton = () => (
+  <div className="w-full max-w-6xl mx-auto px-4 py-12 animate-pulse">
+    <div className="h-6 w-48 bg-white/10 rounded mb-6 mx-auto" />
+    <div className="space-y-3">
+      <div className="h-4 w-full bg-white/5 rounded" />
+      <div className="h-4 w-3/4 bg-white/5 rounded" />
+      <div className="h-4 w-5/6 bg-white/5 rounded" />
+    </div>
+  </div>
+);
+
 const ExampleLibrary = dynamic(() => loadExampleLibrary().then((m) => m.ExampleLibrary), {
   ssr: false,
+  loading: SectionSkeleton,
 });
 
 const EducationSection = dynamic(() => loadEducationSection().then((m) => m.EducationSection), {
   ssr: false,
+  loading: SectionSkeleton,
 });
 
 export default function Home() {
@@ -35,6 +48,8 @@ export default function Home() {
   const { showToast } = useToast();
   const [showDetails, setShowDetails] = useState(false);
   const [showExtended, setShowExtended] = useState(false);
+  const [sharedPromptLoaded, setSharedPromptLoaded] = useState(false);
+  const [copiedSummary, setCopiedSummary] = useState(false);
   const prevTimestampRef = useRef<string | null>(null);
 
   // Preload heavy sections after first paint for snappier "full mode".
@@ -80,6 +95,7 @@ export default function Home() {
       try {
         const decoded = decodeURIComponent(atob(p));
         setPrompt(decoded);
+        setSharedPromptLoaded(true);
         // Remove the query param from the URL to avoid re-loading on refresh
         window.history.replaceState({}, '', window.location.pathname);
       } catch {
@@ -117,22 +133,20 @@ export default function Home() {
   const handleCopySummary = useCallback(async () => {
     if (!result) return;
     const action = result.security.detections.length > 0
-      ? (language === 'fr'
-        ? 'Corriger les zones risquées avec la réécriture sécurisée.'
-        : 'Fix risky zones with the safe rewrite.')
-      : (language === 'fr'
-        ? 'Renforcer le prompt avec les suggestions qualité.'
-        : 'Strengthen the prompt with quality suggestions.');
+      ? t(TRANSLATIONS.summary.actionRisky)
+      : t(TRANSLATIONS.summary.actionQuality);
     const summary = [
-      `Risk: ${result.security.riskScore}/5`,
-      `Quality: ${result.quality.qualityScore}/5`,
-      `Detections: ${result.security.detections.length}`,
-      `Suggestions: ${result.quality.suggestions.length}`,
-      `Next action: ${action}`,
+      `${t(TRANSLATIONS.verdict.riskLabel)}: ${result.security.riskScore}/5`,
+      `${t(TRANSLATIONS.verdict.qualityLabel)}: ${result.quality.qualityScore}/5`,
+      `${t(TRANSLATIONS.summary.detections)}: ${result.security.detections.length}`,
+      `${t(TRANSLATIONS.summary.suggestions)}: ${result.quality.suggestions.length}`,
+      `${action}`,
     ].join('\n');
-    const copied = await copyTextToClipboard(summary);
-    if (copied) showToast(t(TRANSLATIONS.security.copied));
-  }, [language, result, showToast, t]);
+    await copyTextToClipboard(summary);
+    setCopiedSummary(true);
+    setTimeout(() => setCopiedSummary(false), 1500);
+    showToast(t(TRANSLATIONS.security.copied));
+  }, [result, showToast, t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030305]">
@@ -203,18 +217,27 @@ export default function Home() {
                 onClear={clear}
                 isAnalyzing={isAnalyzing}
                 isBusy={isAiLoading}
+                isDone={!!result && !isAnalyzing && !isAiLoading}
               />
             </div>
+
+            {sharedPromptLoaded && !result && (
+              <div className="mt-3 flex items-center justify-center gap-2 px-3 py-2 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-200 text-xs">
+                <span>&#9888;</span>
+                <span>{t(TRANSLATIONS.sharedPrompt.banner)}</span>
+                <button type="button" onClick={() => setSharedPromptLoaded(false)} className="ml-2 text-amber-300 hover:text-white transition-colors">&times;</button>
+              </div>
+            )}
 
             {(isAnalyzing || isAiLoading || result) && (
               <div className="mt-3 text-center">
                 <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-white/10 bg-white/[0.03] text-xs text-slate-300">
                   <span className={`w-1.5 h-1.5 rounded-full ${isAnalyzing || isAiLoading ? 'bg-cyan-400 animate-pulse' : 'bg-emerald-400'}`} />
                   {isAnalyzing
-                    ? (language === 'fr' ? 'Analyse locale en cours...' : 'Running local analysis...')
+                    ? t(TRANSLATIONS.status.localAnalysis)
                     : isAiLoading
-                      ? (language === 'fr' ? 'Affinage IA en cours...' : 'Running AI refinement...')
-                      : (language === 'fr' ? 'Analyse terminée' : 'Analysis complete')}
+                      ? t(TRANSLATIONS.status.aiRefinement)
+                      : t(TRANSLATIONS.status.complete)}
                 </span>
               </div>
             )}
@@ -226,7 +249,7 @@ export default function Home() {
                   <div className="flex items-start justify-between gap-3 mb-4">
                     <div>
                       <h3 className="text-base sm:text-lg font-semibold text-white">
-                        {language === 'fr' ? 'Résumé de l’analyse' : 'Analysis summary'}
+                        {t(TRANSLATIONS.summary.title)}
                       </h3>
                       <p className="text-xs text-slate-400 mt-1">
                         {new Date(result.timestamp).toLocaleTimeString()}
@@ -236,9 +259,20 @@ export default function Home() {
                       <button
                         type="button"
                         onClick={handleCopySummary}
-                        className="px-2.5 py-1 text-xs text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
+                        className={`
+                          inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300
+                          ${copiedSummary
+                            ? 'text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 scale-105'
+                            : 'text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08]'
+                          }
+                        `}
                       >
-                        {language === 'fr' ? 'Copier le résumé' : 'Copy summary'}
+                        {copiedSummary && (
+                          <svg className="w-3.5 h-3.5 animate-fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+                        )}
+                        {copiedSummary ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.summary.copyButton)}
                       </button>
                       <button
                         type="button"
@@ -260,21 +294,17 @@ export default function Home() {
                       <ScoreBadge score={result.quality.qualityScore} type="quality" size="sm" />
                     </div>
                     <div className="text-xs text-slate-400">
-                      {result.security.detections.length} {language === 'fr' ? 'détections' : 'detections'}
+                      {result.security.detections.length} {t(TRANSLATIONS.summary.detections)}
                     </div>
                     <div className="text-xs text-slate-400">
-                      {result.quality.suggestions.length} {language === 'fr' ? 'suggestions' : 'suggestions'}
+                      {result.quality.suggestions.length} {t(TRANSLATIONS.summary.suggestions)}
                     </div>
                   </div>
 
                   <div className="text-sm text-slate-200 rounded-xl border border-white/10 bg-black/20 p-3">
                     {result.security.detections.length > 0
-                      ? (language === 'fr'
-                        ? 'Action prioritaire: corriger les zones risquées avec la réécriture sécurisée, puis vérifier la version améliorée.'
-                        : 'Priority action: fix risky zones with the safe rewrite, then validate the improved version.')
-                      : (language === 'fr'
-                        ? 'Action prioritaire: appliquer la première suggestion qualité pour renforcer le prompt.'
-                        : 'Priority action: apply the first quality suggestion to strengthen your prompt.')}
+                      ? t(TRANSLATIONS.summary.actionRisky)
+                      : t(TRANSLATIONS.summary.actionQuality)}
                   </div>
                 </div>
 
@@ -352,12 +382,12 @@ export default function Home() {
 
               <div className="mt-10 rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-6">
                 <h3 className="text-sm font-semibold uppercase tracking-wide text-white mb-3">
-                  {language === 'fr' ? 'Comment le scoring fonctionne' : 'How scoring works'}
+                  {t(TRANSLATIONS.scoring.title)}
                 </h3>
                 <div className="text-sm text-slate-300 space-y-2">
-                  <p>1. {language === 'fr' ? 'Détection de motifs OWASP + signaux de risque.' : 'OWASP pattern detection + risk signals.'}</p>
-                  <p>2. {language === 'fr' ? 'Évaluation qualité sur 6 dimensions.' : 'Quality evaluation across 6 dimensions.'}</p>
-                  <p>3. {language === 'fr' ? 'Sorties actionnables : réécriture sûre + prompt amélioré.' : 'Actionable outputs: safe rewrite + improved prompt.'}</p>
+                  <p>1. {t(TRANSLATIONS.scoring.step1)}</p>
+                  <p>2. {t(TRANSLATIONS.scoring.step2)}</p>
+                  <p>3. {t(TRANSLATIONS.scoring.step3)}</p>
                 </div>
               </div>
             </div>
@@ -464,7 +494,7 @@ export default function Home() {
         >
           {showDetails
             ? t(TRANSLATIONS.verdict.hideDetails)
-            : `${t(TRANSLATIONS.verdict.seeDetails)} · ${result.security.detections.length} ${language === 'fr' ? 'risques' : 'risks'} · ${result.quality.suggestions.length} ${language === 'fr' ? 'suggestions' : 'suggestions'}`}
+            : `${t(TRANSLATIONS.verdict.seeDetails)} · ${result.security.detections.length} ${t(TRANSLATIONS.summary.risks)} · ${result.quality.suggestions.length} ${t(TRANSLATIONS.summary.suggestions)}`}
         </button>
       )}
 

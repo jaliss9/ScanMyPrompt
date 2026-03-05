@@ -5,7 +5,7 @@ import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { SparklesIcon } from '@/components/ui/Icons';
 import { useToast } from '@/components/Toast';
-import { sanitizeAiInsightsText } from '@/utils/aiInsights';
+import { sanitizeAiInsightsText, extractImprovedPromptFromInsights } from '@/utils/aiInsights';
 import { copyTextToClipboard } from '@/utils/clipboard';
 
 interface AIInsightsProps {
@@ -19,15 +19,71 @@ interface AIInsightsProps {
   showUnavailable?: boolean;
 }
 
+function ImprovedPromptBlock({ text }: { text: string }) {
+  const { t } = useLanguage();
+  const { showToast } = useToast();
+  const [copied, setCopied] = useState(false);
+
+  const improved = extractImprovedPromptFromInsights(text);
+  if (!improved) return null;
+
+  const handleCopy = async () => {
+    await copyTextToClipboard(improved);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+    showToast(t(TRANSLATIONS.security.copied));
+  };
+
+  return (
+    <div className="mb-5 rounded-xl border border-cyan-500/20 bg-cyan-500/5 p-4">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-sm font-bold text-cyan-200">
+          {t(TRANSLATIONS.quality.improvedPrompt)}
+        </h4>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className={`
+            inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300
+            ${copied
+              ? 'text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 scale-105'
+              : 'text-cyan-300 hover:text-cyan-200 border border-cyan-500/25 bg-cyan-500/10 hover:bg-cyan-500/20'
+            }
+          `}
+        >
+          {copied && (
+            <svg className="w-3.5 h-3.5 animate-fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          )}
+          {copied ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.quality.copyImproved)}
+        </button>
+      </div>
+      <p className="text-[15px] text-gray-200 leading-7 whitespace-pre-wrap">{improved}</p>
+    </div>
+  );
+}
+
+const IMPROVED_HEADING_PATTERN = /^(#{2,4}\s*)?(version améliorée du prompt|improved prompt version)\s*$/i;
+
 function MarkdownRenderer({ text }: { text: string }) {
   // Simple markdown → HTML: bold, bullets, code blocks, headings
   const lines = text.split('\n');
   const elements: React.ReactNode[] = [];
   let inCodeBlock = false;
   let codeLines: string[] = [];
+  let skipImprovedSection = false;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
+
+    // Detect the "Improved prompt version" heading — skip it and everything after,
+    // it will be rendered by ImprovedPromptBlock instead.
+    if (!inCodeBlock && IMPROVED_HEADING_PATTERN.test(line.trim())) {
+      skipImprovedSection = true;
+      continue;
+    }
+    if (skipImprovedSection) continue;
 
     if (line.startsWith('```')) {
       if (inCodeBlock) {
@@ -97,7 +153,12 @@ function MarkdownRenderer({ text }: { text: string }) {
     );
   }
 
-  return <>{elements}</>;
+  return (
+    <>
+      <ImprovedPromptBlock text={text} />
+      {elements}
+    </>
+  );
 }
 
 function renderInline(text: string) {
@@ -179,12 +240,10 @@ export function AIInsights({
 
   const handleCopyInsights = async () => {
     if (!safeInsights) return;
-    const copied = await copyTextToClipboard(safeInsights);
-    if (copied) {
-      setCopiedInsights(true);
-      setTimeout(() => setCopiedInsights(false), 1500);
-      showToast(t(TRANSLATIONS.security.copied));
-    }
+    await copyTextToClipboard(safeInsights);
+    setCopiedInsights(true);
+    setTimeout(() => setCopiedInsights(false), 1500);
+    showToast(t(TRANSLATIONS.security.copied));
   };
 
   return (
@@ -208,18 +267,20 @@ export function AIInsights({
               <button
                 type="button"
                 onClick={handleCopyInsights}
-                className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
+                className={`
+                  inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300
+                  ${copiedInsights
+                    ? 'text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 scale-105'
+                    : 'text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08]'
+                  }
+                `}
               >
+                {copiedInsights && (
+                  <svg className="w-3.5 h-3.5 animate-fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                )}
                 {copiedInsights ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.ai.copyAnalysis)}
-              </button>
-            )}
-            {onCopyImproved && (
-              <button
-                type="button"
-                onClick={onCopyImproved}
-                className="px-2.5 py-1 text-xs text-cyan-300 hover:text-cyan-200 border border-cyan-500/25 bg-cyan-500/10 hover:bg-cyan-500/20 rounded-md transition-colors"
-              >
-                {t(TRANSLATIONS.quality.copyImproved)}
               </button>
             )}
             {onToggleDetails && (

@@ -48,6 +48,7 @@ interface PromptInputProps {
   onClear: () => void;
   isAnalyzing: boolean;
   isBusy?: boolean;
+  isDone?: boolean;
 }
 
 export function PromptInput({
@@ -57,6 +58,7 @@ export function PromptInput({
   onClear,
   isAnalyzing,
   isBusy = false,
+  isDone = false,
 }: PromptInputProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<SpeechRecognitionLike | null>(null);
@@ -71,10 +73,14 @@ export function PromptInput({
   const isVisualLoading = isAnalyzing || isBusy;
 
   const borderGradient = isVisualLoading
-    ? 'linear-gradient(90deg, #fb7185, #f97316, #facc15, #fb7185)'
+    ? 'conic-gradient(from 0deg, #fb7185, #f97316, #facc15, #fb7185)'
     : isActive
-      ? 'linear-gradient(90deg, #22d3ee, #3b82f6, #a855f7, #ec4899, #22d3ee)'
-      : 'linear-gradient(90deg, #3B82F6, #8B5CF6, #EC4899, #3B82F6)';
+      ? 'conic-gradient(from 0deg, #22d3ee, #3b82f6, #a855f7, #ec4899, #22d3ee)'
+      : 'conic-gradient(from 0deg, #3B82F6, #8B5CF6, #EC4899, #3B82F6)';
+
+  // Stop animation when analysis is done — show a static gradient border
+  const shouldAnimate = isVisualLoading || (!isDone && isActive);
+  const borderSpeed = isVisualLoading ? '2.4s' : isActive ? '4s' : '6s';
 
   const typewriterPhrases = useMemo(
     () => TRANSLATIONS.typewriter.phrases[language],
@@ -153,7 +159,7 @@ export function PromptInput({
       <div
         className={`
           absolute -inset-1 blur-2xl rounded-[32px] pointer-events-none transition-all duration-400 motion-reduce:transition-none
-          ${isVisualLoading ? 'opacity-65' : isActive ? 'opacity-55' : 'opacity-35'}
+          ${isVisualLoading ? 'opacity-65' : isDone ? 'opacity-25' : isActive ? 'opacity-55' : 'opacity-35'}
         `}
         style={{
           backgroundImage: isVisualLoading
@@ -165,16 +171,20 @@ export function PromptInput({
       />
 
       {/* Animated gradient border container */}
-      <div className="relative group rounded-[28px] sm:rounded-[32px] p-[1px]">
-        {/* Border gradient overlay - animated */}
+      <div className="relative group rounded-[28px] sm:rounded-[32px] p-[1.5px]">
+        {/* Rotating conic-gradient clipped to the border ring */}
         <div
-          className="absolute inset-0 rounded-[28px] sm:rounded-[32px] bg-[length:200%_100%] bg-no-repeat transition-opacity duration-300 motion-reduce:transition-none motion-reduce:animate-none"
-          style={{
-            backgroundImage: borderGradient,
-            animation: `border-flow ${isVisualLoading ? '2.4s' : isActive ? '4s' : '6s'} linear infinite`,
-            opacity: isVisualLoading ? 1 : isActive ? 0.95 : 0.8
-          }}
-        />
+          className="absolute inset-0 rounded-[28px] sm:rounded-[32px] overflow-hidden motion-reduce:animate-none"
+          style={{ opacity: isVisualLoading ? 1 : isActive ? 0.95 : 0.8 }}
+        >
+          <div
+            className="absolute inset-[-80%] transition-[background] duration-300"
+            style={{
+              backgroundImage: borderGradient,
+              animation: shouldAnimate ? `spin ${borderSpeed} linear infinite` : 'none',
+            }}
+          />
+        </div>
 
         {/* Main input container - STRICT DARK BACKGROUND */}
         <div className="relative bg-[#1f1f1f] rounded-[27px] sm:rounded-[31px] shadow-2xl flex flex-col min-h-[140px] sm:min-h-[160px]">

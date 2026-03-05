@@ -73,10 +73,6 @@ export const TRANSLATIONS = {
       fr: 'Aucune menace de sécurité détectée.',
     },
     highlightedPrompt: { en: 'Highlighted Prompt', fr: 'Prompt annoté' },
-    safeRewrite: { en: 'Safe Rewrite', fr: 'Réécriture sécurisée' },
-    original: { en: 'Original', fr: 'Original' },
-    sanitized: { en: 'Sanitized', fr: 'Assaini' },
-    copyClean: { en: 'Copy Clean Version', fr: 'Copier la version nettoyée' },
     copyPrompt: { en: 'Copy prompt', fr: 'Copier le prompt' },
     copied: { en: 'Copied!', fr: 'Copié !' },
     legend: { en: 'Legend', fr: 'Légende' },
@@ -228,8 +224,8 @@ export const TRANSLATIONS = {
     },
     autoTitle: { en: 'Actionable improvements', fr: 'Améliorations concrètes' },
     autoDesc: {
-      en: 'Get safe rewrites and quality suggestions to harden and refine your prompts.',
-      fr: 'Obtenez des réécritures sûres et des suggestions pour renforcer et affiner vos prompts.',
+      en: 'Get quality suggestions and an improved version to refine your prompts.',
+      fr: 'Obtenez des suggestions de qualité et une version améliorée pour affiner vos prompts.',
     },
     security: { en: 'Security', fr: 'Sécurité' },
     quality: { en: 'Quality', fr: 'Qualité' },
@@ -465,6 +461,35 @@ export const TRANSLATIONS = {
       },
     },
   },
+  status: {
+    localAnalysis: { en: 'Running local analysis...', fr: 'Analyse locale en cours...' },
+    aiRefinement: { en: 'Running AI refinement...', fr: 'Affinage IA en cours...' },
+    complete: { en: 'Analysis complete', fr: 'Analyse terminée' },
+  },
+  summary: {
+    title: { en: 'Analysis summary', fr: 'Résumé de l\u2019analyse' },
+    copyButton: { en: 'Copy summary', fr: 'Copier le résumé' },
+    detections: { en: 'detections', fr: 'détections' },
+    suggestions: { en: 'suggestions', fr: 'suggestions' },
+    actionRisky: {
+      en: 'Priority action: review risky zones, then validate the improved version.',
+      fr: 'Action prioritaire\u00a0: examiner les zones risquées, puis vérifier la version améliorée.',
+    },
+    actionQuality: {
+      en: 'Priority action: apply the first quality suggestion to strengthen your prompt.',
+      fr: 'Action prioritaire\u00a0: appliquer la première suggestion qualité pour renforcer le prompt.',
+    },
+    risks: { en: 'risks', fr: 'risques' },
+  },
+  scoring: {
+    title: { en: 'How scoring works', fr: 'Comment le scoring fonctionne' },
+    step1: { en: 'OWASP pattern detection + risk signals.', fr: 'Détection de motifs OWASP + signaux de risque.' },
+    step2: { en: 'Quality evaluation across 6 dimensions.', fr: 'Évaluation qualité sur 6 dimensions.' },
+    step3: { en: 'Actionable outputs: safe rewrite + improved prompt.', fr: 'Sorties actionnables\u00a0: réécriture sûre + prompt amélioré.' },
+  },
+  sharedPrompt: {
+    banner: { en: 'Prompt loaded from a shared link', fr: 'Prompt chargé depuis un lien partagé' },
+  },
   export: {
     button: { en: 'Export Report', fr: 'Exporter le rapport' },
     filename: { en: 'scanmyprompt-report', fr: 'scanmyprompt-rapport' },
@@ -508,8 +533,8 @@ export const TRANSLATIONS = {
       fr: 'Analyse IA indisponible',
     },
     fallback: {
-      en: 'Showing heuristic results only. You can still use risk, quality, and rewrite outputs.',
-      fr: 'Affichage des résultats heuristiques uniquement. Vous pouvez toujours utiliser le risque, la qualité et les réécritures.',
+      en: 'Showing heuristic results only. You can still use risk and quality outputs.',
+      fr: 'Affichage des résultats heuristiques uniquement. Vous pouvez toujours utiliser le risque et la qualité.',
     },
     retry: {
       en: 'Retry AI analysis',
@@ -576,8 +601,8 @@ export const TRANSLATIONS = {
     },
     step3Title: { en: 'Get actionable results', fr: 'Obtiens des r\u00e9sultats concrets' },
     step3Desc: {
-      en: 'See a risk score, highlighted danger zones, a safe rewrite, quality suggestions, and an auto-improved version of your prompt.',
-      fr: 'Visualise un score de risque, les zones dangereuses surlign\u00e9es, une r\u00e9\u00e9criture s\u00e9curis\u00e9e, des suggestions de qualit\u00e9 et une version am\u00e9lior\u00e9e de ton prompt.',
+      en: 'See a risk score, highlighted danger zones, quality suggestions, and an auto-improved version of your prompt.',
+      fr: 'Visualise un score de risque, les zones dangereuses surlign\u00e9es, des suggestions de qualit\u00e9 et une version am\u00e9lior\u00e9e de ton prompt.',
     },
     featuresTitle: { en: 'Features', fr: 'Fonctionnalit\u00e9s' },
     featSecurity: { en: 'Security Scanning', fr: 'Analyse de s\u00e9curit\u00e9' },

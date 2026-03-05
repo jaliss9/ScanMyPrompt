@@ -71,17 +71,6 @@ export function generateMarkdownReport(
   }
   lines.push('');
 
-  // Safe Rewrite
-  if (result.security.safeVersion && result.security.safeVersion !== result.prompt) {
-    const safeTitle = t(TRANSLATIONS.security.safeRewrite, language);
-    lines.push(`### ${safeTitle}`);
-    lines.push('');
-    lines.push('```');
-    lines.push(result.security.safeVersion);
-    lines.push('```');
-    lines.push('');
-  }
-
   // --- Quality ---
   const qualLabel = t(result.quality.qualityLabel, language);
   const qualTitle = t(TRANSLATIONS.quality.title, language);

@@ -2,10 +2,13 @@ import { NextResponse } from 'next/server';
 import { sanitizeAiInsightsText } from '@/utils/aiInsights';
 
 // ---------------------------------------------------------------------------
-// Simple in-memory rate limiter (per-IP, sliding window)
+// In-memory rate limiter (per-IP, sliding window)
+// Note: resets on cold start in serverless — acceptable for free tier abuse
+// prevention. For production scale, upgrade to Vercel KV or Upstash Redis.
 // ---------------------------------------------------------------------------
 const RATE_LIMIT_WINDOW_MS = 60_000; // 1 minute
 const RATE_LIMIT_MAX = 10; // max requests per window
+const ALLOWED_LANGUAGES = new Set(['en', 'fr']);
 
 const ipHits = new Map<string, number[]>();
 
@@ -73,8 +76,14 @@ const JSON_HEADERS = {
 
 export async function POST(request: Request) {
   try {
+    // --- CSRF: origin + X-Requested-With check ---
     if (!isSameOrigin(request)) {
       return NextResponse.json({ error: 'Forbidden origin' }, { status: 403, headers: JSON_HEADERS });
+    }
+
+    const xrw = request.headers.get('x-requested-with');
+    if (xrw !== 'ScanMyPrompt') {
+      return NextResponse.json({ error: 'Missing CSRF header' }, { status: 403, headers: JSON_HEADERS });
     }
 
     // --- Rate limiting ---
@@ -118,8 +127,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ insights: null }, { headers: JSON_HEADERS });
     }
 
-    const isFrench = language === 'fr';
+    // --- Whitelist language ---
+    const safeLang = typeof language === 'string' && ALLOWED_LANGUAGES.has(language) ? language : 'en';
+    const isFrench = safeLang === 'fr';
     const lang = isFrench ? 'French' : 'English';
+
     const safeRiskScore = Number.isFinite(Number(riskScore))
       ? Math.max(0, Math.min(5, Math.round(Number(riskScore))))
       : 0;
@@ -183,7 +195,8 @@ Use exactly this structure:
       clearTimeout(timeoutId);
 
       if (!res.ok) {
-        console.error('Groq API error:', res.status, await res.text());
+        // Log status only — never log response body (may contain API key in error)
+        console.error('Groq API error: status', res.status);
         return NextResponse.json({ insights: null }, { headers: JSON_HEADERS });
       }
 
@@ -197,12 +210,12 @@ Use exactly this structure:
       if (fetchError instanceof DOMException && fetchError.name === 'AbortError') {
         console.error('Groq API timeout after', GROQ_TIMEOUT_MS, 'ms');
       } else {
-        console.error('Groq API fetch error:', fetchError);
+        console.error('Groq API fetch failed');
       }
       return NextResponse.json({ insights: null }, { headers: JSON_HEADERS });
     }
-  } catch (error) {
-    console.error('AI insights error:', error);
+  } catch {
+    console.error('AI insights: unexpected error');
     return NextResponse.json({ insights: null }, { headers: JSON_HEADERS });
   }
 }
