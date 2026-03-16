@@ -44,7 +44,7 @@ export function VerdictCard({ result, aiInsights }: VerdictCardProps) {
   }, [result, aiInsights, language, t]);
 
   return (
-    <div id="verdict" className="bg-[#121821] rounded-2xl border border-[#273142] p-5 sm:p-6">
+    <div id="verdict" className="bg-[#111] rounded-2xl border border-white/10 border-t-2 border-t-blue-500/40 p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="text-base sm:text-lg font-semibold text-white">
@@ -59,7 +59,7 @@ export function VerdictCard({ result, aiInsights }: VerdictCardProps) {
             type="button"
             onClick={handleCopySummary}
             className={`
-              inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300
+              inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300 active:scale-95
               ${copiedSummary
                 ? 'text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 scale-105'
                 : 'text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08]'
@@ -76,7 +76,7 @@ export function VerdictCard({ result, aiInsights }: VerdictCardProps) {
           <button
             type="button"
             onClick={handleExport}
-            className="px-2.5 py-1 text-xs text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
+            className="px-2.5 py-1 text-xs text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-all active:scale-95"
           >
             {t(TRANSLATIONS.export.button)}
           </button>

@@ -30,7 +30,7 @@ function QualityContent({ result }: { result: AnalysisResult }) {
       {/* Quality Radar & Dimensions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Radar Chart Container */}
-        <div className="flex items-center justify-center bg-gray-800 border border-gray-700 rounded-2xl shadow-sm p-6">
+        <div className="flex items-center justify-center bg-[#111] border border-white/10 rounded-2xl shadow-sm p-6">
           <QualityRadar dimensions={result.quality.dimensions} />
         </div>
 
@@ -41,19 +41,19 @@ function QualityContent({ result }: { result: AnalysisResult }) {
             return (
               <div
                 key={dim.dimension}
-                className="p-4 bg-gray-800 border border-gray-700 rounded-xl shadow-sm transition-all hover:bg-gray-700 hover:border-gray-600"
+                className="p-4 bg-[#111] border border-white/10 rounded-xl shadow-sm transition-all hover:bg-white/[0.04] hover:border-white/15"
                 style={{ animationDelay: `${idx * 100}ms` }}
               >
                 <div className="flex items-center justify-between mb-3">
                   <span className="text-sm font-semibold text-white tracking-wide">
                     {t(TRANSLATIONS.dimensions[dimKey].name)}
                   </span>
-                  <span className="text-xs font-bold text-gray-400 bg-gray-900 px-2 py-0.5 rounded-full border border-gray-700">
+                  <span className="text-xs font-bold text-gray-400 bg-black/40 px-2 py-0.5 rounded-full border border-white/10">
                     {Math.round(dim.score * 100)}%
                   </span>
                 </div>
 
-                <div className="relative h-2 bg-gray-700 rounded-full overflow-hidden mb-3">
+                <div className="relative h-2 bg-white/10 rounded-full overflow-hidden mb-3">
                   <div
                     className="absolute top-0 left-0 h-full rounded-full transition-all duration-1000 ease-out"
                     style={{
@@ -66,7 +66,7 @@ function QualityContent({ result }: { result: AnalysisResult }) {
                 </div>
 
                 {dim.findings.length > 0 && (
-                  <p className="text-xs text-gray-400 leading-relaxed pl-2 border-l-2 border-gray-600">
+                  <p className="text-xs text-gray-400 leading-relaxed pl-2 border-l-2 border-white/15">
                     {t(dim.findings[0])}
                   </p>
                 )}

@@ -33,7 +33,7 @@ export function TabBar({ tabs, activeTab, onTabChange }: TabBarProps) {
     <div className="relative flex p-1 glass-panel rounded-xl bg-black/20 backdrop-blur-md border border-white/5">
       {/* Sliding Indicator */}
       <div
-        className="absolute top-1 bottom-1 bg-violet-600 rounded-lg shadow-lg shadow-violet-600/20 transition-all duration-300 ease-out z-0"
+        className="absolute top-1 bottom-1 bg-violet-600 rounded-lg shadow-lg shadow-violet-600/20 transition-[left,width] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] will-change-[left,width] z-0"
         style={{
           left: indicatorStyle.left,
           width: indicatorStyle.width,
