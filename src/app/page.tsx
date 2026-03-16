@@ -7,16 +7,14 @@ import { PromptInput } from '@/components/PromptInput';
 import { AIInsights } from '@/components/AIInsights';
 import { ResultsTabs } from '@/components/ResultsTabs';
 import { Footer } from '@/components/Footer';
-import { IconBadge } from '@/components/ui/IconBadge';
-import { ZapIcon, CheckCircleIcon, SparklesIcon } from '@/components/ui/Icons';
-import { ScoreBadge } from '@/components/ui/ScoreBadge';
+import { FeaturesGrid } from '@/components/FeaturesGrid';
+import { VerdictCard } from '@/components/VerdictCard';
 import { useAnalysis } from '@/hooks/useAnalysis';
 import { useLanguage } from '@/hooks/useLanguage';
 import { TRANSLATIONS } from '@/config/i18n';
 import { useToast } from '@/components/Toast';
 import { extractImprovedPromptFromInsights } from '@/utils/aiInsights';
 import { copyTextToClipboard } from '@/utils/clipboard';
-import { generateMarkdownReport, downloadMarkdown } from '@/utils/exportMarkdown';
 
 const loadExampleLibrary = () => import('@/components/ExampleLibrary');
 const loadEducationSection = () => import('@/components/EducationSection');
@@ -49,7 +47,6 @@ export default function Home() {
   const [showDetails, setShowDetails] = useState(false);
   const [showExtended, setShowExtended] = useState(false);
   const [sharedPromptLoaded, setSharedPromptLoaded] = useState(false);
-  const [copiedSummary, setCopiedSummary] = useState(false);
   const prevTimestampRef = useRef<string | null>(null);
 
   // Preload heavy sections after first paint for snappier "full mode".
@@ -116,37 +113,9 @@ export default function Home() {
       ? extractImprovedPromptFromInsights(aiInsights)
       : null;
     const textToCopy = improvedFromInsights ?? result.quality.improvedVersion;
-    const copied = await copyTextToClipboard(textToCopy);
-    if (copied) {
-      showToast(t(TRANSLATIONS.security.copied));
-    }
-  }, [aiInsights, result, showToast, t]);
-
-  const handleExport = useCallback(() => {
-    if (!result) return;
-    const lang = language === 'fr' ? 'fr' as const : 'en' as const;
-    const md = generateMarkdownReport(result, aiInsights, lang);
-    const filename = `${t(TRANSLATIONS.export.filename)}-${new Date().toISOString().slice(0, 10)}.md`;
-    downloadMarkdown(md, filename);
-  }, [result, aiInsights, language, t]);
-
-  const handleCopySummary = useCallback(async () => {
-    if (!result) return;
-    const action = result.security.detections.length > 0
-      ? t(TRANSLATIONS.summary.actionRisky)
-      : t(TRANSLATIONS.summary.actionQuality);
-    const summary = [
-      `${t(TRANSLATIONS.verdict.riskLabel)}: ${result.security.riskScore}/5`,
-      `${t(TRANSLATIONS.verdict.qualityLabel)}: ${result.quality.qualityScore}/5`,
-      `${t(TRANSLATIONS.summary.detections)}: ${result.security.detections.length}`,
-      `${t(TRANSLATIONS.summary.suggestions)}: ${result.quality.suggestions.length}`,
-      `${action}`,
-    ].join('\n');
-    await copyTextToClipboard(summary);
-    setCopiedSummary(true);
-    setTimeout(() => setCopiedSummary(false), 1500);
+    await copyTextToClipboard(textToCopy);
     showToast(t(TRANSLATIONS.security.copied));
-  }, [result, showToast, t]);
+  }, [aiInsights, result, showToast, t]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#030305]">
@@ -245,68 +214,7 @@ export default function Home() {
             {/* Results — directly under prompt */}
             {result && (
               <div className="mt-6 sm:mt-10 space-y-4 animate-fade-in max-w-6xl mx-auto">
-                <div id="verdict" className="bg-[#121821] rounded-2xl border border-[#273142] p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div>
-                      <h3 className="text-base sm:text-lg font-semibold text-white">
-                        {t(TRANSLATIONS.summary.title)}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1">
-                        {new Date(result.timestamp).toLocaleTimeString()}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleCopySummary}
-                        className={`
-                          inline-flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-md transition-all duration-300
-                          ${copiedSummary
-                            ? 'text-emerald-300 border border-emerald-500/40 bg-emerald-500/15 scale-105'
-                            : 'text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08]'
-                          }
-                        `}
-                      >
-                        {copiedSummary && (
-                          <svg className="w-3.5 h-3.5 animate-fade-in" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                        )}
-                        {copiedSummary ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.summary.copyButton)}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleExport}
-                        className="px-2.5 py-1 text-xs text-slate-300 border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
-                      >
-                        {t(TRANSLATIONS.export.button)}
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-4 sm:gap-6 mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">{t(TRANSLATIONS.verdict.riskLabel)}</span>
-                      <ScoreBadge score={result.security.riskScore} type="risk" size="sm" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-400">{t(TRANSLATIONS.verdict.qualityLabel)}</span>
-                      <ScoreBadge score={result.quality.qualityScore} type="quality" size="sm" />
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {result.security.detections.length} {t(TRANSLATIONS.summary.detections)}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      {result.quality.suggestions.length} {t(TRANSLATIONS.summary.suggestions)}
-                    </div>
-                  </div>
-
-                  <div className="text-sm text-slate-200 rounded-xl border border-white/10 bg-black/20 p-3">
-                    {result.security.detections.length > 0
-                      ? t(TRANSLATIONS.summary.actionRisky)
-                      : t(TRANSLATIONS.summary.actionQuality)}
-                  </div>
-                </div>
+                <VerdictCard result={result} aiInsights={aiInsights} />
 
                 {/* AI Insights — between verdict and details */}
                 <AIInsights
@@ -328,127 +236,12 @@ export default function Home() {
           </div>
         </div>
 
-        {!showExtended && !result && (
-          <section id="features-compact" className="relative w-full pb-14 pt-2 overflow-hidden border-t border-white/10">
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-              <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-              <div className="absolute top-1/2 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl" />
-            </div>
-
-            <div className="relative z-10 max-w-6xl mx-auto px-4">
-              <div className="text-center mb-12">
-                <h2 className="text-3xl font-bold text-white mb-4">
-                  {t(TRANSLATIONS.features.title)}
-                </h2>
-                <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                  {t(TRANSLATIONS.features.subtitle)}
-                </p>
-              </div>
-
-              <div className="grid md:grid-cols-3 gap-8">
-                <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <IconBadge icon={<ZapIcon />} variant="primary" />
-                  <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                    {t(TRANSLATIONS.features.instantTitle)}
-                  </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {t(TRANSLATIONS.features.instantDesc)}
-                  </p>
-                </div>
-
-                <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <IconBadge icon={<CheckCircleIcon />} variant="success" />
-                  <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                    {t(TRANSLATIONS.features.owaspTitle)}
-                  </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {t(TRANSLATIONS.features.owaspDesc)}
-                  </p>
-                </div>
-
-                <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <IconBadge icon={<SparklesIcon />} variant="primary" />
-                  <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                    {t(TRANSLATIONS.features.autoTitle)}
-                  </h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">
-                    {t(TRANSLATIONS.features.autoDesc)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="mt-10 rounded-2xl border border-white/10 bg-black/20 p-5 sm:p-6">
-                <h3 className="text-sm font-semibold uppercase tracking-wide text-white mb-3">
-                  {t(TRANSLATIONS.scoring.title)}
-                </h3>
-                <div className="text-sm text-slate-300 space-y-2">
-                  <p>1. {t(TRANSLATIONS.scoring.step1)}</p>
-                  <p>2. {t(TRANSLATIONS.scoring.step2)}</p>
-                  <p>3. {t(TRANSLATIONS.scoring.step3)}</p>
-                </div>
-              </div>
-            </div>
-          </section>
+        {!result && (
+          <FeaturesGrid showScoring={!showExtended} />
         )}
 
         {showExtended && (
           <div className="animate-fade-in">
-            <section id="features" className="relative section-padding overflow-hidden border-y border-white/10">
-              <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute -top-24 -left-24 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
-                <div className="absolute top-1/2 right-0 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl" />
-              </div>
-
-              <div className="relative z-10 max-w-6xl mx-auto px-4">
-                <div className="text-center mb-16">
-                  <h2 className="text-3xl font-bold text-white mb-4">
-                    {t(TRANSLATIONS.features.title)}
-                  </h2>
-                  <p className="text-lg text-gray-400 max-w-2xl mx-auto">
-                    {t(TRANSLATIONS.features.subtitle)}
-                  </p>
-                </div>
-
-                <div className="grid md:grid-cols-3 gap-8">
-                  <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <IconBadge icon={<ZapIcon />} variant="primary" />
-                    <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                      {t(TRANSLATIONS.features.instantTitle)}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {t(TRANSLATIONS.features.instantDesc)}
-                    </p>
-                  </div>
-
-                  <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <IconBadge icon={<CheckCircleIcon />} variant="success" />
-                    <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                      {t(TRANSLATIONS.features.owaspTitle)}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {t(TRANSLATIONS.features.owaspDesc)}
-                    </p>
-                  </div>
-
-                  <div className="relative bg-[#111111] rounded-2xl p-8 shadow-lg card-lift overflow-hidden border border-[#222] hover:border-[#333] transition-all group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    <IconBadge icon={<SparklesIcon />} variant="primary" />
-                    <h3 className="text-xl font-semibold text-white mt-6 mb-3">
-                      {t(TRANSLATIONS.features.autoTitle)}
-                    </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed">
-                      {t(TRANSLATIONS.features.autoDesc)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
             {!result && (
               <section id="examples" className="relative section-padding w-full border-t border-white/10">
                 <div className="absolute inset-0 overflow-hidden pointer-events-none">

@@ -4,7 +4,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { LanguageProvider } from "@/hooks/useLanguage";
 import { ToastProvider } from "@/components/Toast";
-import { LovableBackground } from "@/components/ui/LovableBackground";
 
 const SITE_URL = 'https://scan-my-prompt.vercel.app';
 
@@ -69,14 +68,8 @@ export default function RootLayout({
       <body className="antialiased">
         <LanguageProvider>
           <ToastProvider>
-            {/* Main wrapper - Dark theme base to match Lovable background */}
-            <div className="min-h-screen relative overflow-hidden bg-[#030305]">
-              <LovableBackground />
-
-              {/* Content with z-index to sit above background */}
-              <div className="relative z-10">
-                {children}
-              </div>
+            <div className="min-h-screen bg-[#030305]">
+              {children}
             </div>
           </ToastProvider>
         </LanguageProvider>

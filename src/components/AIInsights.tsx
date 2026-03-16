@@ -12,10 +12,7 @@ interface AIInsightsProps {
   insights: string | null;
   isLoading: boolean;
   onCopyImproved?: () => void;
-  onToggleDetails?: () => void;
   onRetry?: () => void;
-  showDetails?: boolean;
-  detailsPanelId?: string;
   showUnavailable?: boolean;
 }
 
@@ -225,10 +222,7 @@ export function AIInsights({
   insights,
   isLoading,
   onCopyImproved,
-  onToggleDetails,
   onRetry,
-  showDetails = false,
-  detailsPanelId,
   showUnavailable = false,
 }: AIInsightsProps) {
   const { t } = useLanguage();
@@ -281,17 +275,6 @@ export function AIInsights({
                   </svg>
                 )}
                 {copiedInsights ? t(TRANSLATIONS.security.copied) : t(TRANSLATIONS.ai.copyAnalysis)}
-              </button>
-            )}
-            {onToggleDetails && (
-              <button
-                type="button"
-                onClick={onToggleDetails}
-                aria-expanded={showDetails}
-                aria-controls={detailsPanelId}
-                className="px-2.5 py-1 text-xs text-slate-300 hover:text-white border border-white/10 bg-white/[0.03] hover:bg-white/[0.08] rounded-md transition-colors"
-              >
-                {showDetails ? t(TRANSLATIONS.verdict.hideDetails) : t(TRANSLATIONS.verdict.seeDetails)}
               </button>
             )}
           </div>

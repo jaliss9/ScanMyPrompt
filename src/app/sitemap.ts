@@ -26,13 +26,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       alternates: alternates('/about'),
     },
     {
-      url: `${SITE_URL}/contact`,
-      lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.5,
-      alternates: alternates('/contact'),
-    },
-    {
       url: `${SITE_URL}/terms`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
